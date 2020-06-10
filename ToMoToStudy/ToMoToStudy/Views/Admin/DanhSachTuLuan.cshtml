@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewBag.Title = "Danh Sách Tự Luận";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewBag.Title</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Quản lý</li>
+            <li class="breadcrumb-item active" aria-current="page">Tự luận</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" onclick="ModalThemTuLuan()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tên</th>
+                                <th>Thời gian</th>
+                                <th>Hạn chót</th>
+                                <th>Người tạo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+
+                                var tuluan = db.TuLuans.ToList();
+                                foreach (var item in tuluan.ToList())
+                                {
+                                    <tr>
+                                        <td>@item.TenTuLuan</td>
+                                        <td>@item.ThoiGian</td>
+                                        <td>@item.HanChot</td>
+                                        <td>@item.NguoiDung.TaiKhoan</td>
+                                        <td>
+                                            <div class="btn-group float-right" role="group">
+                                                <a class="btn btn-primary" href="/Admin/ChiTietTuLuan/@item.IdTuLuan" role="button"><i class="fa fa-edit"></i></a>
+                                                <button type="button" class="btn btn-danger" onclick="XoaLopHoc(@item.IdTuLuan,'@item.TenTuLuan')"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div id="ModalThemTuLuan">
+    @{
+        Html.RenderPartial("_PartialThemTuLuan");
+    }
+</div>
+
+<script type="text/javascript">
+    function ModalThemTuLuan() {
+        idCT = 0;
+        idtuluan = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tentuluan']").val("");
+        $("[name='thoigiantuluan']").val("");
+        $("[name='hanchottuluan']").val("");
+        $("[name='motatuluan']").val("");
+        $("[name='idnguoidungtuluan']").val("");
+        $('#modalAddTuLuan').modal("show");
+    }
+    
+</script>

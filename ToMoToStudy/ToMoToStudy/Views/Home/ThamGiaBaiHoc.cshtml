@@ -1,0 +1,110 @@
+﻿@model ToMoToStudy.BaiHoc
+
+@{
+    ViewBag.Title = "ThamGiaBaiHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="alert alert-success" role="alert" style="margin:10px 0">
+        Bài học: @Model.TenBaiHoc
+    </div>
+    <div class="row">
+        <div class="col-9" style="padding:10px">
+
+          
+            @if(Model.Video!=null)
+            {
+                <iframe width="100%" height="500px" src="@Model.Video" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            }
+
+            <div style="border:1px solid #dee2e6;border-radius: 10px;">
+                <div class="card">
+                    <div class="card-header">
+                        Nội dung
+                    </div>
+                    <div class="card-body">
+                        @{
+                            string noidung = Model.NoiDung ?? "";
+                            //noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+
+                            @Html.Raw(noidung)
+
+                        }
+                    </div>
+                </div>
+              
+            </div>
+            <div style="border:1px solid #dee2e6 ; margin:10px 0;border-radius: 10px;">
+
+                <div style="padding:20px">
+                    <label class="sr-only" for="inlineFormInputGroup">Nhận xét của bạn</label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" name="bl@(Model.IdBaiHoc)" id="" placeholder="Nhận xét cá nhân">
+                        <div class="input-group-prepend">
+                            <button class="input-group-text" onclick="BinhLuan(@Model.IdBaiHoc)" style="border-radius: 20px;border-top-left-radius: 0;border-bottom-left-radius: 0;padding:0 20px">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                {
+                    var binhluan = db.BinhLuans.Where(x => x.IdBaiHoc == Model.IdBaiHoc).ToList();
+                    foreach (var bl in binhluan)
+                    {
+                        <hr />
+                        <div class="row" style="padding:0 20px 20px;">
+                            <div class="col-3" style="border-right:1px solid #dee2e6;text-align: center;"><h5 class="text-center" style="margin:0">@bl.NguoiDung.HoTen</h5> <small style="margin:0" class="text-center">@bl.NgayBinhLuan</small></div>
+                            <div class="col-8">@bl.NoiDung</div>
+                            <div class="col-1"><a class="float-right" href="#"><i class="fas fa-info-circle"></i></a></div>
+                        </div>
+                    }
+                }
+
+            </div>
+        </div>
+        <div class="col-3" style="padding:10px">
+            <div class="form-group align-self-center"  style="border:1px solid #dee2e6;border-radius: 10px;">
+                <input type="file" id="selectedFile" style="display: none;" />
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('selectedFile').click();"><i class="fas fa-plus"></i> Chọn file</button>
+                <br />
+                <button type="button" class="btn btn-primary">Gửi lên</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
+    function BinhLuan(id) {
+        var idthaoluan = 0;
+        var idbaihoc = id;
+        var noidung = $("[name='bl" + id + "']").val();
+        if (noidung == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostBinhLuan',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idthaoluan,
+                noidung,
+                idnguoidung,
+                idbaihoc
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

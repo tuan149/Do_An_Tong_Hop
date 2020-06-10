@@ -1,0 +1,408 @@
+﻿@model ToMoToStudy.CT_HOC
+@{
+    ViewBag.Title = "ChiTietCTHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="col-lg-12">
+        <div class="table-responsive p-3">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Thông tin chi tiết</a>
+                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Danh sách nội dung</a>
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                @* tab 1 *@
+                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Tên Chương Trình</label>
+                                <input type="text" class="form-control" disabled name="email" value="@Model.TenCT">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div>
+                                    <label>Ngày tạo</label>
+                                    <input disabled type="datetime-local" class="form-control" data-date="" data-date-format="DD/MM/YYYY \l\ú\c HH:mm" name="HanChot" value="@Model.NgayTao.Value.ToString(@"yyyy-MM-dd\THH:mm:ss")">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                Môn học
+                                <select class="form-control" name="IdMonHoc">
+                                    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                    {
+                                        var list = db.MonHocs.ToList();
+                                        foreach (var item in list)
+                                        {
+                                            <option class="form-control" value="@item.IdMonHoc">@item.TenMonHoc</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2">
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                        </div>
+                    </div>
+                </div>
+                @* tab 2 *@
+            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" style="padding:15px">
+                <div>
+                    <form>
+                        <div class="card-header align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Thêm nội dung mới</h6>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="form-group col-10">
+                                <select class="form-control "  name="chonnoidung">
+                                    <option value="baihoc">Bài học</option>
+                                    <option value="baituluan">Bài tự luận</option>
+                                    <option value="baitracnghiem">Bài trắc nghiệm</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-2">
+                                <button type="button" class="btn btn-primary btn-block float-right" onclick="ThemNoiDung()"><i class="fas fa-plus"></i> Thêm</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="margin-bottom:20px">
+                            @*<button type="button" class="btn btn-primary float-right" onclick="SaveInfo(@Model.IdMonHoc, $('#dsKhoa').val())"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>*@
+                        </div>
+                    </form>
+                </div>
+
+                <div>
+                    <form>
+                        <div class="card-header align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Thêm nội dung có sẵn</h6>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="form-group col-5">
+                                <select class="form-control selectpicker" onchange="DoiLoaiBai()" name="chonloaibai" id="chonloaibai">
+                                    <option value="baihoc">Bài học</option>
+                                    <option value="baituluan">Bài tự luận</option>
+                                    <option value="baitracnghiem">Bài trắc nghiệm</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-5">
+                                <select class="form-control selectpicker" data-live-search="true" name="chonbai" id="chonbai">
+                                    <option value="">Vui lòng chọn</option>
+                                    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                    {
+                                        var nd = (NguoiDung)Session["user"];
+                                        foreach (var item in db.BaiHocs.Where(x=>x.IdNguoiDung==nd.IdNguoiDung).ToList())
+                                        {
+                                            <option class="option-loai option-baihoc" value="@item.IdBaiHoc">@item.TenBaiHoc</option>
+                                        }
+                                        foreach (var item in db.TuLuans.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList())
+                                        {
+                                            <option class="option-loai option-baituluan" value="@item.IdTuLuan">@item.TenTuLuan</option>
+                                        }
+                                        foreach (var item in db.TracNghiems.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList())
+                                        {
+                                            <option class="option-loai option-baitracnghiem" value="@item.IdTracNghiem">@item.TenTracNghiem</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-2">
+                                <button type="button" class="btn btn-primary btn-block float-right" onclick="ChonLoaiBai()"><i class="fas fa-plus"></i> Thêm</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="margin-bottom:20px">
+                            @*<button type="button" class="btn btn-primary float-right" onclick="SaveInfo(@Model.IdMonHoc, $('#dsKhoa').val())"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>*@
+                        </div>
+                    </form>
+                </div>
+                <hr />
+                <div>
+
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Danh sách nội dung trong chương trình học</h6>
+                    </div>
+
+                    <div style="padding:15px">
+                        <div id="sortableChiTiet" class="list-group">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                int thutu = 0;
+                                var chitiet = db.CHITIET_CT_HOC.Where(x => x.IdCTHoc == Model.IdCTHoc).OrderBy(x => x.ThuTu).ThenBy(x => x.IdChiTiet).ToList();
+                                foreach (var noidung in chitiet)
+                                {
+                                    string link = "";
+                                    <div class="list-group-item sortlist align-items-center row chitiet-cthoc" id-chitiet="@noidung.IdChiTiet" thutu="@(thutu++)" style="display: flex;">
+                                        <div class="col-11">
+                                            @thutu -
+                                            @if (noidung.TuLuan != null)
+                                            {
+                                                link = "/Home/ChiTietTuLuan/" + noidung.IdTuLuan;
+                                                @noidung.TuLuan.TenTuLuan
+                                            }
+                                            else if (noidung.TracNghiem != null)
+                                            {
+                                                link = "/Home/ChiTietTracNghiem/" + noidung.IdTracNghiem;
+                                                @noidung.TracNghiem.TenTracNghiem
+                                            }
+                                            else
+                                            {
+                                                link = "/Home/ChiTietBaiHoc/" + noidung.IdBaiHoc;
+                                                @noidung.BaiHoc.TenBaiHoc
+                                            }
+                                        </div>
+                                        <div class="col-1" style="display:flex">
+                                            <div class="col">
+                                                <a href="@link" class="float-right"><i class="fas fa-wrench"></i></a>
+
+                                            </div>
+
+                                            <div class="col">
+                                                <i class="fas fa-arrows-alt-v handle float-right align-self-center"></i>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <br />
+                        <div class="text-right">
+                            <button type="button" class="btn btn-primary float-right" onclick="CapNhatThuTu()"><i class="fas fa-save"></i> Cập nhật thứ tự</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div id="ModalThemBaiHoc">
+    @{
+        Html.RenderPartial("_PartialThemBaiHoc");
+    }
+</div>
+<div id="ModalThemTuLuan">
+    @{
+        Html.RenderPartial("_PartialThemTuLuan");
+    }
+</div>
+<div id="ModalThemTracNghiem">
+    @{
+        Html.RenderPartial("_PartialThemTracNghiem");
+    }
+</div>
+
+@if (Request.Params["RefeshTab"] != null)
+{
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+            $("#nav-profile-tab").tab("show");
+        });
+    </script>
+}
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        DoiLoaiBai();
+    });
+    var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
+</script>
+
+<script type="text/javascript">
+    new Sortable(sortableChiTiet, {
+        handle: '.handle', // handle's class
+        animation: 150
+    });
+</script>
+<script type="text/javascript">
+
+    var idCT = @Model.IdCTHoc;
+
+    function CapNhatThuTu() {
+        var thutu = 0;
+        var count = $(".chitiet-cthoc").length;
+
+        $(".chitiet-cthoc").each(function (i) {
+            var idchitiet = $(this).attr("id-chitiet");
+            $(this).attr("thutu", thutu++);
+            $.ajax({
+                url: '/Ajax/PostCapNhatThuTu',
+                type: 'POST',
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                dataType: "json",
+                data: {
+                    idchitiet,
+                    thutu,
+                },
+            }).done(function (ketqua) {
+            });
+            if (i + 1 === count) {
+                location.reload();
+                alert("Cập nhật hoàn tất");
+            }
+        });
+    }
+    function ModalThemBaiHoc() {
+        idbaihoc = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tenbaihoc']").val("");
+        $("[name='noidungbaihoc']").val("");
+        $("[name='videobaihoc']").val("");
+        //$("[name='idnguoidungbaihoc']").val("");
+        $('#modalAddBaiHoc').modal("show");
+    }
+    function ModalThemTuLuan() {
+        idtuluan = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tentuluan']").val("");
+        $("[name='thoigiantuluan']").val("");
+        $("[name='hanchottuluan']").val("");
+        $("[name='motatuluan']").val("");
+        //$("[name='idnguoidungtuluan']").val("");
+        $('#modalAddTuLuan').modal("show");
+    }
+    function ModalThemTracNghiem() {
+        idtracnghiem = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tentracnghiem']").val("");
+        $("[name='thoigiantracnghiem']").val("");
+        $("[name='hanchottracnghiem']").val("");
+        $("[name='motatracnghiem']").val("");
+        $("[name='idnguoidungtracnghiem']").val("");
+        $('#modalAddTracNghiem').modal("show");
+    }
+    function ThemNoiDung() {
+        var NDThem = $("[name='chonnoidung']").val();
+        if (NDThem == "baihoc") {
+            ModalThemBaiHoc();
+        }
+        else if (NDThem == "baituluan") {
+            ModalThemTuLuan();
+        }
+        else {
+            ModalThemTracNghiem();
+        }
+    }
+
+    function DoiLoaiBai() {
+       
+
+        var sb = $("#chonloaibai");
+        var loai = sb.val();
+        $(".option-loai").each(function () {
+            $(this).hide();
+            $('#chonloaibai').selectpicker('refresh');
+        });
+
+        $(".option-" + loai).each(function () {
+            $('#chonloaibai').selectpicker('refresh');
+            $(this).show();
+        });
+       
+    }
+
+    function ChonLoaiBai() {
+        var sb = $("#chonloaibai");
+        var loai = sb.val();
+        if (loai == "baihoc") chonbaibaihoc();
+        else if (loai == "baituluan") chonbaituluan();
+        else if (loai == "baitracnghiem") chonbaitrachnghiem();
+    }
+
+
+    function chonbaibaihoc() {
+        var idcthoc =@Model.IdCTHoc;
+        var idchitiet = 0;
+        var idbaihoc     = $("[name='chonbai']").val();
+        //alert(idtuluan);
+        $.ajax({
+            url: '/Ajax/ThemCTBaiCu',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcthoc,
+                idbaihoc,
+                idchitiet,
+            },
+        }).done(function (ketqua) {
+            $('#modalAdd').modal("hide");
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                bootbox.alert("Lưu dữ liệu thành công");
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function chonbaituluan() {
+        var idcthoc =@Model.IdCTHoc;
+        var idchitiet = 0;
+        var idtuluan = $("[name='chonbai']").val();
+        //alert(idtuluan);
+        $.ajax({
+            url: '/Ajax/ThemCTBaiCu',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcthoc,
+                idtuluan,
+                idchitiet,
+            },
+        }).done(function (ketqua) {
+            $('#modalAdd').modal("hide");
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+
+                bootbox.alert("Lưu dữ liệu thành công");
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function chonbaitrachnghiem() {
+        var idcthoc =@Model.IdCTHoc;
+        var idchitiet = 0;
+        var idtrachnghiem= $("[name='chonbai']").val();
+        //alert(idtuluan);
+        $.ajax({
+            url: '/Ajax/ThemCTBaiCu',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcthoc,
+                idtrachnghiem,
+                idchitiet,
+            },
+        }).done(function (ketqua) {
+            $('#modalAdd').modal("hide");
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+
+                bootbox.alert("Lưu dữ liệu thành công");
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+
+</script>

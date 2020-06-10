@@ -1,0 +1,183 @@
+﻿
+@{
+    ViewBag.Title = "Danh sách lớp";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewBag.Title</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Quản lý</li>
+            <li class="breadcrumb-item active" aria-current="page">Môn học</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" onclick="ThemLopHoc()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Mã lớp</th>
+                                <th>Tên lớp</th>
+                                <th>Tình trạng</th>
+                                <th>CT-Học</th>
+                                <th>Người tạo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+
+                                var lophoc = db.LopHocs.ToList();
+
+
+                                foreach (var item in lophoc.ToList())
+                                {
+                                    <tr>
+                                        <td>@item.MaLop</td>
+                                        <td>@item.TenLop</td>
+                                        <td>@Html.Raw(item.TinhTrang == 1 ? "<span class=\"badge badge-success\" style=\"display: block\">Hoạt động</span>" : "<span  style=\"display: block\" class=\"badge badge-danger\">Đã vô hiệu hóa</span>")</td>
+                                        <td>@item.CT_HOC.TenCT</td>
+                                        <td>@item.NguoiDung.HoTen</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a class="btn btn-primary" href="/Admin/ChiTietLopHoc/@item.IdLopHoc" role="button"><i class="fa fa-edit"></i></a>
+                                                <button type="button" class="btn btn-danger" onclick="XoaLopHoc(@item.IdLopHoc,'@item.TenLop')"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle">Thêm môn học</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Mã lớp</label>
+                        <input type="text" class="form-control" name="malop">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên lớp</label>
+                        <input type="text" class="form-control" name="tenlop">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Mô tả</label>
+                        <textarea type="text" class="form-control" name="mota" minlength="5" maxlength="6000"></textarea>
+                    </div>
+                    @*<div class="form-group">
+                        <label class="col-form-label">Tình trạng</label>
+                        <input type="text" class="form-control" name="tinhtrang">
+                    </div>*@
+                <div class="form-group">
+                    CT-Học
+                    <select name="cthoc" class="form-control select">
+
+                        @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                        {
+                            foreach (var item in db.CT_HOC.ToList())
+                            {
+                                <option value="@item.IdCTHoc">@item.TenCT</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+                <div class="form-group">
+                    Người tạo
+                    <select name="nguoidung" class="form-control select">
+
+                        @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                        {
+                            foreach (var item in db.NguoiDungs.ToList())
+                            {
+                                <option value="@item.IdNguoiDung">@item.HoTen</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var idlophoc = 0;
+    var tinhtrang = 1;
+    function ThemLopHoc() {
+        idlophoc = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='malop']").val("");
+        $("[name='tenlop']").val("");
+        $("[name='mota']").val("");
+        $("[name='tinhtrang']").val("");
+        $("[name='cthoc']").val("");
+        $("[name='nguoidung']").val("");
+        $('#modalAdd').modal("show");
+    }
+
+    function SaveInfo() {
+        var malop = $("[name='malop']").val();
+        var tenlop = $("[name='tenlop']").val();
+        var mota = $("[name='mota']").val();
+        var tinhtrang = $("[name='tinhtrang']").val();
+        var cthoc = $("[name='cthoc']").val();
+        var nguoidung = $("[name='nguoidung']").val();
+        if (malop == '' || tenlop == '' || mota == '' || tinhtrang == '' || cthoc == '' || nguoidung=='') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostLopHoc',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdLopHoc: idlophoc,
+                MaLop: malop,
+                TenLop: tenlop,
+                MoTa: mota,
+                TinhTrang: tinhtrang,
+                IdCTHoc: cthoc,
+                IdNguoiDung: nguoidung
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

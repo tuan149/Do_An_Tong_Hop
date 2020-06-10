@@ -1,0 +1,68 @@
+﻿@model ToMoToStudy.TuLuan
+
+@{
+    ViewBag.Title = "ThamGiaTuLuan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="margin-bottom:80px">
+    <div class="alert alert-success" role="alert" style="margin:10px 0">
+        Bài tự luận: @Model.TenTuLuan
+        <br>
+        Hạn chót: @Model.HanChot
+    </div>
+    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+    {
+        int i = 1;
+        var tuluancauhoi = db.TuLuan_CauHoi.Where(x => x.IdTuLuan == Model.IdTuLuan).ToList();
+        foreach (var item in tuluancauhoi)
+        {
+            string noidung = item.CauHoiTuLuan ?? "";
+            noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    Câu @(i++):
+                </div>
+                <div class="card-body" style="padding:0">
+                    <blockquote class="blockquote mb-0" style="padding: 20px">
+                        @Html.Raw(noidung)
+                    </blockquote>
+                    <hr />
+                    <div class="form-group" style="padding:5px 20px">
+                        <label for="TL@(i)">Câu trả lời</label>
+                        <textarea class="form-control" id="TL@(i)" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<style>
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+<footer>
+    <div class="row float-right bg-color" style="width:100%; padding:10px; margin:0;">
+        <div class="col">
+
+        </div>
+        <div class="col align-self-center">
+            <div class="row ">
+                <div class="col">
+                    <button type="button" style="float:right;padding:5px 20px" class=" btn-secondary">Cập nhật</button>
+                </div>
+                <div class="col ">
+                    <button type="button" style="padding:5px 20px" class=" btn-success" onclick="NopTuLuan()">Nộp bài</button>
+                </div>
+            </div>
+
+        </div>
+        <div class="col align-self-center " style="color:white;font-size:25px">
+            <b class="float-right">Thời gian: @Model.ThoiGian</b>
+        </div>
+    </div>
+</footer>

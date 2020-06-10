@@ -1,0 +1,41 @@
+﻿@{ 
+    int id = (int)ViewBag.Id;
+}
+
+<div class="table-responsive p-3" style="padding: 15px">
+    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Nội dung</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+            {
+                int i = 1;
+                var tuluan = db.TuLuans.Where(x => x.IdTuLuan == id).FirstOrDefault();
+                foreach (var item in tuluan.TuLuan_CauHoi)
+                {
+                    string noidung = item.CauHoiTuLuan ?? "";
+                    noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+                    if (noidung.Length > 100)
+                    {
+                         noidung = noidung.Substring(0, 100) + "...";
+                    }
+                    <tr>
+                        <td>@(i++)</td>
+                        <td>@Html.Raw(noidung)</td>
+                        <td>
+                            <div class="btn-group float-right" role="group">
+                                <button type="button" class="btn btn-primary" onclick="SuaTuLuanCauHoi(@item.IdCauHoiTuLuan)"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-danger" onclick="XoaCauHoi(@item.IdCauHoiTuLuan)"><i class="fa fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

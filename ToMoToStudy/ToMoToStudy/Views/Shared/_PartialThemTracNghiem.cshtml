@@ -1,0 +1,87 @@
+﻿@{
+    Layout = null;
+}
+    <div class="modal fade" id="modalAddTracNghiem" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTitle">Thêm</h5>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label">Tên</label>
+                            <input type="text" class="form-control" name="tentracnghiem">
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Thời gian làm (phút)</label>
+                            <input type="number" min="0" max="10000" class="form-control" id="WarningDayLeft" placeholder="Thời gian" name="thoigiantracnghiem">
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Thời gian hết hạn</label>
+                            <input type="datetime-local" class="form-control" id="OpenDate" placeholder="Thời gian hết hạn" name="hanchottracnghiem" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Mô tả</label>
+                            <textarea type="text" class="form-control" name="motatracnghiem" minlength="5" maxlength="6000"></textarea>
+                        </div>
+                        @*<div class="form-group">
+                            Người tạo
+                            <select name="idnguoidung" class="form-control select">
+                                @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                {
+                                    foreach (var item in db.NguoiDungs.ToList())
+                                    {
+                                        <option value="@item.IdNguoiDung">@item.TaiKhoan</option>
+                                    }
+                                }
+                            </select>
+                        </div>*@
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveTracNghiem()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        function SaveTracNghiem() {
+            var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
+            var tentracnghiem = $("[name='tentracnghiem']").val();
+            var thoigian = $("[name='thoigiantracnghiem']").val();
+            var hanchot = $("[name='hanchottracnghiem']").val();
+            var mota = $("[name='motatracnghiem']").val();
+            //var idnguoidungtracnghiem = $("[name='idnguoidungtracnghiem']").val();
+            if (tentracnghiem == '' || thoigian == '') {
+                alert("Vui lòng điền đủ thông tin!");
+                return;
+            }
+            $.ajax({
+                url: '/Ajax/PostTracNghiem',
+                type: 'POST',
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                dataType: "json",
+                data: {
+                    idtracnghiem,
+                    tentracnghiem,
+                    thoigian,
+                    hanchot,
+                    mota,
+                    idnguoidung,
+                    idCT,
+                },
+            }).done(function (ketqua) {
+                //ketqua = $.parseJSON(ketqua);
+                if (ketqua.Success) {
+                    alert("Lưu dữ liệu thành công");
+                    location.reload();
+                    return;
+                }
+                alert(ketqua.Message);
+            });
+        }
+    </script>

@@ -1,0 +1,156 @@
+﻿@model ToMoToStudy.CT_HOC
+
+@{
+    ViewBag.Title = "CTHoc";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách CT Học</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Tài khoản</li>
+            <li class="breadcrumb-item active" aria-current="page">Danh sách CT Học</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAdd" onclick="them()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tên</th>
+                                <th>Người tạo</th>
+                                <th>Môn học</th>
+                                <th>Ngày tạo</th>
+                                <th>Chức năng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var list = db.CT_HOC.ToList();
+                                foreach (var cthoc in list)
+                                {
+                            <tr>
+                                <td>@cthoc.TenCT</td>
+                                <td>@cthoc.NguoiDung.TaiKhoan</td>
+                                <td>@(cthoc.IdNguoiDung == null ? "" : cthoc.MonHoc.TenMonHoc)</td>
+                                <td>@(cthoc.NgayTao == null ? "" : cthoc.NgayTao.Value.ToString("dd/MM/yyyy"))</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/Admin/ChiTietCTHoc/@cthoc.IdCTHoc" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>
+                                        <button type="button" class="btn btn-danger" onclick="DeleteMH(@cthoc.IdCTHoc,'@cthoc.TenCT')"><i class="fa fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm</h5>
+
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên CT</label>
+                        <input type="text" class="form-control" name="tenct">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Người tạo</label>
+                        <select class="form-control" name="idnguoidung">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var list = db.NguoiDungs.ToList();
+                                foreach (var item in list)
+                                {
+                                    <option class="form-control" value="@item.IdNguoiDung">@item.TaiKhoan</option>
+                                }
+                            }
+                        </select>                    
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên Môn Học</label>
+                        <select class="form-control" name="idmonhoc">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var list = db.MonHocs.ToList();
+                                foreach (var item in list)
+                                {
+                                    <option class="form-control" value="@item.IdMonHoc">@item.TenMonHoc</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var idcthoc = 0;
+
+    function them() {
+        idcthoc = 0;
+        $("[name='tenct']").val("");
+        $("[name='ngaytao']").val("");
+        $("[name='idnguoidung']").val("");
+        $("[name='idmonhoc']").val("");
+        $("#modalAdd").modal("show");
+    }
+
+    function SaveInfo() {
+        var tenct = $("[name='tenct']").val();
+        var ngaytao = $("[name='ngaytao']").val();
+        var idnguoidung = $("[name='idnguoidung']").val();
+        var idmonhoc = $("[name='idmonhoc']").val();
+        if (tenct == '' || idnguoidung == '' || idmonhoc=='') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostCTHoc',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdCTHoc: 0,
+                TenCT: tenct,
+                NgayTao: ngaytao,
+                IdNguoiDung: idnguoidung,
+                IdMonHoc: idmonhoc,
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

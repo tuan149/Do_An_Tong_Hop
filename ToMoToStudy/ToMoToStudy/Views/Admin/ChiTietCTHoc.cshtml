@@ -1,0 +1,274 @@
+﻿@model ToMoToStudy.CT_HOC
+
+@{
+    ViewBag.Title = "ChiTietCTHoc";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+    <div class="container-fluid" id="container-wrapper">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Chi tiết CT Học</h1>
+        </div>
+
+        <!-- Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card mb-4">
+                    <div class="table-responsive p-3">
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Thông tin ct học</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Chi tiết</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            @* tab 1 *@
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                                @using (Html.BeginForm())
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                Tên ct
+                                                <div>
+                                                    @Html.EditorFor(model => model.TenCT, new { htmlAttributes = new { @class = "form-control" } })
+                                                    @Html.ValidationMessageFor(model => model.TenCT, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                Người tạo
+                                                <select class="form-control" name="IdNguoiDung">
+                                                    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                                    {
+                                                        var list = db.NguoiDungs.ToList();
+                                                        foreach (var item in list)
+                                                        {
+
+                                                            <option class="form-control" value="@item.IdNguoiDung">@item.TaiKhoan - @item.HoTen</option>
+                                                        }
+                                                    }
+                                                </select>
+
+                                                <script>
+
+                                                document.addEventListener("DOMContentLoaded", function (event) {
+                                                    $("[name=IdNguoiDung]").val(@Model.IdNguoiDung);
+                                                });
+                                                </script>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                Môn học
+                                                <select class="form-control" name="IdMonHoc">
+                                                    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                                    {
+                                                        var list = db.MonHocs.ToList();
+                                                        foreach (var item in list)
+                                                        {
+                                                            <option class="form-control" value="@item.IdMonHoc">@item.TenMonHoc</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                Ngày tạo
+                                                <div>
+                                                    @Html.EditorFor(model => model.NgayTao, new { htmlAttributes = new { @class = "form-control" } })
+                                                    @Html.ValidationMessageFor(model => model.NgayTao, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-offset-2">
+                                            <button type="submit" class="btn btn-primary">Lưu</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @* tab 2 *@
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" style="padding:15px;margin:10px">
+                                <div style="padding:10px">
+                                    <form style="padding: 15px">
+                                        <div class="card-header align-items-center justify-content-between">
+                                            <h6 class="m-0 font-weight-bold text-primary">Chọn nội dung muốn thêm</h6>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-10">
+                                                <select class="form-control selectpicker" data-live-search="true" name="chonnoidung">
+                                                    <option value="baihoc">Bài học</option>
+                                                    <option value="baituluan">Bài tự luận</option>
+                                                    <option value="baitracnghiem">Bài trắc nghiệm</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-2">
+                                                <button type="button" class="btn btn-primary btn-block float-right" onclick="ThemNoiDung()"><i class="fas fa-plus"></i> Thêm</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12" style="margin-bottom:20px">
+                                            @*<button type="button" class="btn btn-primary float-right" onclick="SaveInfo(@Model.IdMonHoc, $('#dsKhoa').val())"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>*@
+                                        </div>
+                                    </form>
+                                </div>
+                                <div style="padding: 15px">
+                                    <hr />
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Danh sách</h6>
+                                    </div>
+
+                                    <div style="padding:0 15px">
+                                        <div id="sortableChiTiet" class="list-group">
+                                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                            {
+                                                int thutu = 0;
+                                                var chitiet = db.CHITIET_CT_HOC.Where(x => x.IdCTHoc == Model.IdCTHoc).OrderBy(x => x.ThuTu).ThenBy(x => x.IdChiTiet).ToList();
+                                                foreach (var noidung in chitiet)
+                                                {
+
+                                                    <div class="list-group-item sortlist align-items-center row chitiet-cthoc" id-chitiet="@noidung.IdChiTiet" thutu="@(thutu++)" style="display: flex;">
+                                                        <div class="col">
+                                                            @if (noidung.TuLuan != null)
+                                                            {
+                                                                @noidung.TuLuan.TenTuLuan
+                                                            }
+                                                            else if (noidung.TracNghiem != null)
+                                                            {
+                                                                @noidung.TracNghiem.TenTracNghiem
+                                                            }
+                                                            else
+                                                            {
+                                                                @noidung.BaiHoc.TenBaiHoc
+                                                            }
+                                                        </div>
+                                                        <i class="fas fa-arrows-alt-v handle float-right align-self-center"></i>
+                                                    </div>
+
+
+
+                                                }
+                                            }
+
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-primary float-right" onclick="CapNhatThuTu()"><i class="fas fa-save"></i> Cập nhật thứ tự</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Row-->
+        </div>
+
+        <div id="ModalThemBaiHoc">
+            @{
+                Html.RenderPartial("_PartialThemBaiHoc");
+            }
+        </div>
+        <div id="ModalThemTuLuan">
+            @{
+                Html.RenderPartial("_PartialThemTuLuan");
+            }
+        </div>
+        <div id="ModalThemTracNghiem">
+            @{
+                Html.RenderPartial("_PartialThemTracNghiem");
+            }
+        </div>
+
+        @if (Request.Params["RefeshTab"] != null)
+        {
+            <script>
+
+                document.addEventListener("DOMContentLoaded", function (event) {
+                    $("#nav-profile-tab").tab("show");
+                });
+            </script>
+        }
+
+        <script type="text/javascript">
+            new Sortable(sortableChiTiet, {
+                handle: '.handle', // handle's class
+                animation: 150
+            });
+        </script>
+        <script type="text/javascript">
+
+        var idCT =@Model.IdCTHoc;
+
+        function CapNhatThuTu() {
+            var thutu = 0;
+            var count = $(".chitiet-cthoc").length;
+
+            $(".chitiet-cthoc").each(function (i) {
+                var idchitiet = $(this).attr("id-chitiet");
+                $(this).attr("thutu", thutu++);
+                $.ajax({
+                    url: '/Ajax/PostCapNhatThuTu',
+                    type: 'POST',
+                    contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        idchitiet,
+                        thutu,
+                    },
+                }).done(function (ketqua) {
+
+                });
+                if (i + 1 === count) {
+                    alert("Cập nhật hoàn tất");
+                }
+            });
+        }
+
+    function ModalThemBaiHoc() {
+        idbaihoc = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tenbaihoc']").val("");
+        $("[name='noidungbaihoc']").val("");
+        $("[name='videobaihoc']").val("");
+        $("[name='idnguoidungbaihoc']").val("");
+        $('#modalAddBaiHoc').modal("show");
+    }
+    function ModalThemTuLuan() {
+        idtuluan = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tentuluan']").val("");
+        $("[name='thoigiantuluan']").val("");
+        $("[name='hanchottuluan']").val("");
+        $("[name='motatuluan']").val("");
+        $("[name='idnguoidungtuluan']").val("");
+        $('#modalAddTuLuan').modal("show");
+    }
+    function ModalThemTracNghiem() {
+        idtracnghiem = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='tentracnghiem']").val("");
+        $("[name='thoigiantracnghiem']").val("");
+        $("[name='hanchottracnghiem']").val("");
+        $("[name='motatracnghiem']").val("");
+        $("[name='idnguoidungtracnghiem']").val("");
+        $('#modalAddTracNghiem').modal("show");
+    }
+    function ThemNoiDung() {
+        var NDThem = $("[name='chonnoidung']").val();
+        if (NDThem == "baihoc") {
+            ModalThemBaiHoc();
+        }
+        else if (NDThem == "baituluan") {
+            ModalThemTuLuan();
+        }
+        else{
+            ModalThemTracNghiem();
+        }
+    }
+        </script>

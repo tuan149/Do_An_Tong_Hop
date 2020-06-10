@@ -1,0 +1,473 @@
+﻿@model ToMoToStudy.TuLuan
+
+@{
+    ViewBag.Title = "ChiTietTuLuan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container" id="container-wrapper">
+    <div class="alert alert-success" role="alert" style="margin: 10px 0">
+        Nội dung này được tạo bởi <b>@Model.NguoiDung.TaiKhoan</b>
+        <br>
+    </div>
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="">
+                <div class="table-responsive">
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Thông tin bài tự luận</a>
+                            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Danh sách câu hỏi</a>
+                            <a class="nav-item nav-link" id="nav-student-tab" data-toggle="tab" href="#nav-student" role="tab" aria-controls="nav-student" aria-selected="false">Sinh viên tham gia</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        @* tab 1 *@
+                        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <div class="form-horizontal">
+
+                                    <div class="form-group">
+                                        Tên bài tự luận
+                                        <div>
+                                            @Html.EditorFor(model => model.TenTuLuan, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col form-group">
+                                            Thời gian làm
+                                            <div>
+                                                <input class="form-control" type="number" min="0" name="ThoiGian" value="@Model.ThoiGian" />
+                                            </div>
+                                        </div>
+                                        <div class="col form-group">
+                                            Hạn nộp bài
+                                            <div>
+                                                @*<input class="form-control" type="datetime-local" name="HanChot" value="@Model.HanChot.Value.ToString(@"yyyy-MM-dd\THH:mm:ss")" />*@
+                                                <input type="datetime-local" class="DinhDangNgay form-control" data-date="" data-date-format="DD/MM/YYYY \l\ú\c HH:mm" name="HanChot" value="@(Model.HanChot == null ? "" : Model.HanChot.Value.ToString(@"yyyy-MM-dd\THH:mm:ss"))">
+
+                                                <script>
+                                                    document.addEventListener("DOMContentLoaded", function (event) {
+                                                        $(".DinhDangNgay").on("change", function () {
+                                                            this.setAttribute(
+                                                                "data-date",
+                                                                moment(this.value, "YYYY-MM-DDTHH:mm")
+                                                                    .format(this.getAttribute("data-date-format"))
+                                                            )
+                                                        }).trigger("change")
+                                                    });
+
+                                                </script>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        Mô tả
+                                        <div>
+                                            <textarea class="form-control" name="mota">@Model.MoTa</textarea>
+                                            <script>
+                                                CKEDITOR.replace('mota');
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-offset-2 ">
+                                            <button type="submit" class="btn btn-primary">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @* tab 2 *@
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                            <br />
+                            <div class="row" style="padding:0 20px">
+                                <div class="col row"">
+                                    <form id="uploadFileExcel" enctype="multipart/form-data">
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" id="inputGroupTL" >
+                                                <label class="custom-file-label" for="inputGroupTL">...</label>
+                                            </div>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="submit">Tải lên</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col">
+                                    <div class="float-right">
+                                        <button type="button" class="btn btn-primary" onclick="ThemCauHoi()"><i style="margin-right:10px" class="fas fa-plus"></i>Thêm câu hỏi</button>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                            <div style="padding:10px">
+                                <div class="card">
+                                    <h5 class="card-header">Thêm câu hỏi có sẵn</h5>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <select class="form-control selectpicker" data-live-search="true" id="selectcauhoituluan" name="cauhoituluancu">
+                                                @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                                {
+                                                    var nd = (NguoiDung)Session["user"];
+                                                    var tuluancauhoi = db.TuLuan_CauHoi.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList();
+                                                    foreach (var item in tuluancauhoi)
+                                                    {
+                                                        string noidung = item.CauHoiTuLuan ?? "";
+                                                        noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+                                                        if (noidung.Length > 100)
+                                                        {
+                                                            noidung = noidung.Substring(0, 100) + "...";
+                                                        }
+
+                                                        <option value="@item.IdCauHoiTuLuan">@Html.Raw(noidung)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-12" style="margin-bottom:20px">
+                                            <button type="button" class="btn btn-primary float-right" onclick="ThemTuLuanCu()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>
+                                        </div>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                            <div>
+                                <div id="divListQuestion">
+                                    @{
+                                        ViewBag.Id = Model.IdTuLuan;
+                                        Html.RenderPartial("_PartialListQuestion");
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @* tab 3 *@
+                        <div class="tab-pane fade" id="nav-student" role="tabpanel" aria-labelledby="nav-student-tab" style="padding:15px;margin:10px">
+                            <div class="table-responsive p-3" style="padding: 15px">
+                                <table class="table align-items-center table-flush table-hover" id="dataTable2">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Mssv</th>
+                                            <th>Họ tên</th>
+                                            <th>Lớp</th>
+                                            <th>Điểm số</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                        {
+                                            int i = 1;
+                                            var listStudent = db.SinhVien_TL_DapAn.Where(x => x.TuLuan_CauHoi.IdCauHoiTuLuan == Model.IdTuLuan).ToList();
+                                            foreach (var item in listStudent)
+                                            {
+                                                <tr>
+                                                    <td>@(i++)</td>
+                                                    <td>@item.SinhVien.Mssv</td>
+                                                    <td>@item.SinhVien.NguoiDung.HoTen</td>
+                                                    <td>@item.SinhVien.MaLopSv</td>
+                                                    <td>@Html.Raw(item.DiemTuLuan != null ? "<span class=\"badge badge-success\" style=\"display: block\">" + @item.DiemTuLuan + "</span>" : "<span  style=\"display: block\" class=\"badge badge-danger\">Chờ chấm</span>")</td>
+                                                    <td>
+                                                        <div class="btn-group float-right" role="group">
+                                                            <button type="button" class="btn btn-primary" onclick="SuaTuLuanSinhVien(@item.IdSinhVien,@item.IdCauHoiTuLuan)"><i class="fa fa-edit"></i></button>
+                                                            <button type="button" class="btn btn-danger" onclick="XoaSinhVienTuLuan(@item.IdSinhVien,@item.IdCauHoiTuLuan,)"><i class="fa fa-trash"></i></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <div class="modal fade" id="modalDiem" tabindex="-1" role="dialog" aria-labelledby="addTitle" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="addTitle">Chấm tự luận</h5>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form>
+                                                                    <div class="form-group">
+                                                                        <label class="col-form-label">Đáp án</label>
+                                                                        <textarea id="dapan" name="dapan" readonly="readonly"></textarea>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label class="col-form-label">Điểm</label>
+                                                                        <input type="number" min="0" max="10" class="form-control" name="diemtuluan">
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                                                                <button type="button" class="btn btn-primary" onclick="SaveDiemTuLuan(@item.IdSinhVien,@item.IdCauHoiTuLuan)">Lưu</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="addTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle">Thêm môn học</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Nội dung câu hỏi</label>
+                        @*<input type="text" class="form-control" name="cauhoituluan">*@
+                        <textarea id="cauhoituluan" name="cauhoituluan"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo(@Model.IdTuLuan)">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $("#dataTable2").DataTable();
+    CKEDITOR.replace('cauhoituluan');
+    CKEDITOR.replace('dapan');
+    var idcauhoituluan = 0;
+
+    function ThemCauHoi() {
+        idcauhoituluan = 0;
+        $("#addTitle").html("Thêm mới");
+        //$("[name='idtuluan']").val("");
+        $("[name='cauhoituluan']").val("");
+        CKEDITOR.instances['cauhoituluan'].setData("");
+        $('#modalAdd').modal("show");
+    }
+
+    function RefeshListQuestion(id) {
+        // id bai tu luan
+        $("#divListQuestion").html('Đợi chút nha...');
+        $.ajax({
+            url: '/Admin/GetListQuestion/' + id,
+            type: 'POST',
+        }).done(function (ketqua) {
+            $("#divListQuestion").html(ketqua);
+        });
+    }
+    function SaveInfo(id) {
+        var idtuluan = id;
+        var cauhoituluan = CKEDITOR.instances['cauhoituluan'].getData();
+        if (cauhoituluan == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostTuLuanCauHoi',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcauhoituluan,
+                idtuluan,
+                cauhoituluan,
+            },
+        }).done(function (ketqua) {
+            $('#modalAdd').modal("hide");
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                RefeshListQuestion(idtuluan);
+                bootbox.alert("Lưu dữ liệu thành công");
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+    function XoaCauHoi(idcauhoituluan) {
+        bootbox.dialog({
+            centerVertical: true,
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        var dialog = bootbox.dialog({
+                            centerVertical: true,
+                            message: '<p class="text-center mb-0"><i class="fas fa-circle-notch fa-spin"></i> Vui lòng đợi trong giây lát...</p>',
+                            closeButton: false,
+                        }).on('shown.bs.modal', function () {
+                            $.ajax({
+                                url: '/Ajax/XoaTuLuanCauHoi/' + idcauhoituluan,
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    idcauhoituluan
+                                },
+                            }).done(function (json) {
+                                dialog.modal('hide');
+                                if (json.Success == false) {
+                                    bootbox.alert(json.Message);
+                                    return;
+                                }
+                                else {
+                                    bootbox.hideAll();
+                                    alert(@Model.IdTuLuan);
+                                    RefeshListQuestion(@Model.IdTuLuan);
+                                }
+                            }).fail(function () {
+                                bootbox.hideAll();
+                                bootbox.alert("Có lỗi không xác định xảy ra khi gửi dữ liệu lên server");
+                            });
+                        });
+
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+
+    function SuaTuLuanCauHoi(id) {
+
+        idcauhoituluan = id;
+        $.ajax({
+            url: '/Ajax/GetTuLuanCauHoi/' + idcauhoituluan,
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                idcauhoituluan,
+            }
+        }).done(function (ketqua) {
+            var json = JSON.parse(ketqua);
+            $("#addTitle").html("Chỉnh sửa");
+            $("[name='cauhoituluan']").val(json.cauhoituluan);
+            //$("#cauhoituluan").val(json.cauhoituluan);
+            CKEDITOR.instances['cauhoituluan'].setData(json.cauhoituluan);
+            $('#modalAdd').modal("show");
+        });
+    }
+    function SuaTuLuanSinhVien(idsinhvien, idcauhoituluan) {
+        $.ajax({
+            url: '/Ajax/GetTuLuanDapAn/',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                idcauhoituluan,
+                idsinhvien
+            }
+        }).done(function (ketqua) {
+            var json = JSON.parse(ketqua);
+            $("#addTitle").html("Chỉnh sửa");
+            $("[name='dapan']").val(json.dapan);
+            CKEDITOR.instances['dapan'].setData(json.dapan);
+            $("[name='diemtuluan']").val(json.diemtuluan);
+            $('#modalDiem').modal("show");
+        });
+    }
+    function SaveDiemTuLuan(idsinhvien, idcauhoituluan) {
+        //var dapan = CKEDITOR.instances['dapan'].getData();
+        var diemtuluan = $("[name='diemtuluan']").val();
+        if (idsinhvien == '' || idcauhoituluan == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostTuLuanDapAn',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcauhoituluan,
+                idsinhvien,
+                //dapan,
+                diemtuluan
+            },
+        }).done(function (ketqua) {
+            $('#modalDiem').modal("hide");
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                bootbox.alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function XoaSinhVienTuLuan(idsinhvien, idcauhoituluan) {
+        bootbox.dialog({
+            centerVertical: true,
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        var dialog = bootbox.dialog({
+                            centerVertical: true,
+                            message: '<p class="text-center mb-0"><i class="fas fa-circle-notch fa-spin"></i> Vui lòng đợi trong giây lát...</p>',
+                            closeButton: false,
+                        }).on('shown.bs.modal', function () {
+                            $.ajax({
+                                url: '/Ajax/XoaSinhVienTuLuan/',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    idsinhvien,
+                                    idcauhoituluan
+                                },
+                            }).done(function (json) {
+                                dialog.modal('hide');
+                                if (json.Success == false) {
+                                    bootbox.alert(json.Message);
+                                    return;
+                                }
+                                else {
+                                    bootbox.hideAll();
+                                }
+                            }).fail(function () {
+                                bootbox.hideAll();
+                                bootbox.alert("Có lỗi không xác định xảy ra khi gửi dữ liệu lên server");
+                            });
+                        });
+
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+
+    }
+
+    function ThemTuLuanCu(){
+        
+    }
+
+</script>

@@ -1,0 +1,129 @@
+﻿<!-- Modal -->
+<style>
+    #nav-tab-login a{
+        color:red;
+    }
+    #nav-tab-login a:hover {
+        color: blue;
+    }
+</style>    
+<div class="modal fade" id="modalLogin" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab-login" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-login-tab" data-toggle="tab" href="#nav-login" role="tab" aria-controls="nav-login" aria-selected="true">Đăng nhập</a>
+                            <a class="nav-item nav-link" id="nav-signin-tab" data-toggle="tab" href="#nav-signin" role="tab" aria-controls="nav-signin" aria-selected="false">Đăng ký</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-login" role="tabpanel" aria-labelledby="nav-login-tab">
+                            <form>
+                                <div class="form-group">
+                                    <label class="col-form-label">Tài khoản</label>
+                                    <input type="text" class="form-control" name="tk">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control" name="mk">
+                                </div>
+                                <div class="form-group">
+                                    <a href="@Url.Action("LayLaiMatKhau", "Home")">Quên mật khẩu ?</a>
+                                </div>
+                                <div class="form-group float-right">
+                                    <button type="button" class="btn btn-primary " onclick="DangNhap()">Đăng nhập</button>
+                                    <button type="button" class="btn btn-secondary " data-dismiss="modal">Đóng</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="nav-signin" role="tabpanel" aria-labelledby="nav-signin-tab">
+                            <form>
+                                <div class="form-group">
+                                    <label class="col-form-label">Tài khoản</label>
+                                    <input type="text" class="form-control" name="taikhoan">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control" name="matkhau">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Email</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Họ tên</label>
+                                    <input type="text" class="form-control" name="hoten">
+                                </div>
+                                
+                                <div class="form-group float-right">
+                                    <button type="button" class="btn btn-primary " onclick="DangKy()">Đăng ký</button>
+                                    <button type="button" class="btn btn-secondary " data-dismiss="modal">Đóng</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    function DangNhap() {
+        var tk = $("[name='tk']").val();
+        var mk = $("[name='mk']").val();
+        if (tk == '' || mk == '' ) {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/DangNhap',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                tk,
+                mk
+            },
+        }).done(function (ketqua) {
+            if (ketqua.Success) {
+                alert("Đăng nhập thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+    function DangKy() {
+        var idnguoidung = 0;
+        var taikhoan = $("[name='taikhoan']").val();
+        var matkhau = $("[name='matkhau']").val();
+        var email = $("[name='email']").val();
+        var hoten = $("[name='hoten']").val();
+        if (taikhoan == '' || matkhau == '' || email == '' || hoten == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/DangKy',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idnguoidung,
+                taikhoan,
+                matkhau,
+                email,
+                hoten
+            },
+        }).done(function (ketqua) {
+            if (ketqua.Success) {
+                alert("Đăng ký thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

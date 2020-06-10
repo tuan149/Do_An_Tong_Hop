@@ -1,0 +1,61 @@
+﻿@{
+    int idSV = (int)ViewBag.IdSV;
+    int idTN = (int)ViewBag.IdTN;
+}
+
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    int i = 1;
+    var tracnghiemdapan = db.TracNghiems.Where(x => x.IdTracNghiem == idTN).FirstOrDefault();
+    foreach (var item in tracnghiemdapan.TracNghiem_CauHoi)
+    {
+        // item chinh la cau hoi
+        string noidungdapan = item.NoiDungCauHoi ?? "";
+        noidungdapan = System.Text.RegularExpressions.Regex.Replace(noidungdapan, "<.*?>", String.Empty);
+        if (noidungdapan.Length > 300)
+        {
+            noidungdapan = noidungdapan.Substring(0, 300) + "...";
+        }
+        <div class="card" style="margin-bottom:10px">
+            <div class="card-header">
+                <b>Câu @(i++)</b>
+            </div>
+            <div class="card-block" style="padding:20px">
+                <label>@Html.Raw(noidungdapan)</label>
+                <hr />
+                <div id-question="@item.IdCauHoi" class="question">
+                    @{
+                        //var sihviendapan = db.TracNghiem_DapAn.Where(x => x.TracNghiem_CauHoi.IdTracNghiem == Model.IdTracNghiem).ToList();
+                        // in ra ds dap an
+                        var sinhvienTraLoi = db.SinhVien_TracNghiem.Where(x => x.IdSinhVien == idSV && x.IdTracNghiem == idTN).ToList();
+                        var dsDapAn = item.TracNghiem_DapAn.ToList();
+                        foreach (var dapan in dsDapAn)
+                        {
+
+                            @*<div class="custom-controls-stacked">
+                                    <label class="custom-control custom-radio">
+                                        <input type="radio" name="question11" value="1" class="custom-control-input" disabled="">
+                                        <span class="custom-control-indicator "></span>
+                                        <span class="custom-control-description">@dapan.DapAn @(dapan.DapAnDung == true ? "(ĐÚNG)" : "(SAI)") @(sinhvienTraLoi.Any(x => x.TracNghiem_DapAn.Any(y => y.IdDapAn == dapan.IdDapAn)) ? "(CÓ CHỌN)" : "")</span>
+                                    </label>
+                                </div>*@
+                            @*<div class="form-check disabled">
+                                <input class="form-check-input " type="radio" name="RadioDapAn-@item.IdCauHoi" id="RadioDapAn-@item.IdCauHoi" @(sinhvienTraLoi.Any(x => x.TracNghiem_DapAn.Any(y => y.IdDapAn == dapan.IdDapAn)) ? "checked" : "disabled")>
+                                <label class="form-check-label bg-success" for="RadioDapAn-@item.IdCauHoi">
+                                    @dapan.DapAn
+                                </label>
+                            </div>*@
+
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="RadioDapAn-@item.IdCauHoi" name="RadioDapAn-@item.IdCauHoi" class="custom-control-input" @(sinhvienTraLoi.Any(x => x.TracNghiem_DapAn.Any(y => y.IdDapAn == dapan.IdDapAn)) ? "checked" : "disabled")>
+                                    <label class="custom-control-label" for="RadioDapAn-@item.IdCauHoi">@dapan.DapAn @(dapan.DapAnDung == true ? "(ĐÚNG)" : "(SAI)")</label>
+                                </div>
+                                
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}

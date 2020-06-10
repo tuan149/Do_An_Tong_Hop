@@ -1,0 +1,500 @@
+﻿@model ToMoToStudy.LopHoc
+
+@{
+    ViewBag.Title = "ChiTietLopHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    var nd = (NguoiDung)Session["user"];
+    var lop = db.LopHocs.Where(x => x.IdLopHoc == Model.IdLopHoc).FirstOrDefault();
+
+    if (lop.IdNguoiDung != nd.IdNguoiDung)
+    {
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+            document.getElementById("nav-home-tab").hidden = true;
+                document.getElementById("nav-home").hidden = true;
+                document.getElementById("tui").innerHTML ="Mô tả: "+ "@Model.MoTa";
+        });
+        </script>
+    }
+    else
+    {
+        <script type="text/javascript">
+            $(document).ready(function () {
+            document.getElementById("nav-home-tab").hidden = false;
+                document.getElementById("nav-home").hidden = false;
+                document.getElementById("tui").innerHTML ="Mã lớp: "+"@Model.MaLop";
+            });
+        </script>
+    }
+
+}
+
+
+<div class="container ">
+    <div class="banner-class" style="padding:20px;color:#FFEA84;font-size:30px">
+        <div>
+            <h1>@Model.TenLop</h1>
+        </div>
+        <div>
+            <h5 id="tui"></h5>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="container">
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div>
+                <div class="table-responsive p-3 ">
+                    <nav>
+                        <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-baitap-tab" data-toggle="tab" href="#nav-baitap" role="tab" aria-controls="nav-baitap" aria-selected="true">Chương trình</a>
+                            <a class="nav-item nav-link" id="nav-noti-tab" data-toggle="tab" href="#nav-noti" role="tab" aria-controls="nav-noti" aria-selected="false">Thảo luận</a>
+                            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Danh sách sinh viên</a>
+                            <a class="nav-item nav-link" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="false" hidden>Chi tiết lớp</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        @* tab 1 *@
+                        <div class="tab-pane fade" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <div class="form-horizontal">
+
+                                    <div class="form-group">
+                                        Mã lớp
+                                        <div>
+                                            <input class="form-control" value="@Model.MaLop" disabled />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        Tên lớp
+                                        <div>
+                                            @Html.EditorFor(model => model.TenLop, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.TenLop, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        Mô tả
+                                        <div>
+                                            <textarea class="form-control" rows="3" id="comment" value="@Model.MoTa">@Model.MoTa</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div>
+
+                                            <label>
+                                                <input type="checkbox" value="@Model.MoTa" id="TinhTrang">
+                                                <input type="checkbox" class="custom-control-input" id="tn-@Model.TinhTrang" @(Model.TinhTrang == 1 ? "checked" : "") onchange="SaveDapAnDung()">
+                                                Tình trạng hoạt động
+                                            </label>
+
+                                            <asp:CheckBox ID="TinhTrang" runat="server" value="Red" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        Chương Trình Học
+                                        <select class="form-control" name="IdCTHoc">
+                                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                            {
+                                                var list = db.CT_HOC.ToList();
+                                                foreach (var item in list)
+                                                {
+                                                    <option class="form-control" value="@item.IdCTHoc">@item.TenCT</option>
+                                                }
+                                            }
+                                        </select>
+
+                                        <script>
+                                                document.addEventListener("DOMContentLoaded", function (event) {
+                                                    $("[name=IdCTHoc]").val(@Model.IdCTHoc);
+                                                });
+                                        </script>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-offset-2 col-md-10">
+                                            <button type="submit" class="btn btn-primary">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @* tab 2 *@
+                        <div class="tab-pane fade" id="nav-noti" role="tabpanel" aria-labelledby="nav-noti-tab" style="padding:15px;margin:10px">
+                            <div class="container">
+                                <div class="head-noti">
+                                    <div class="form-group">
+                                        <label>Thảo luận</label>
+                                        <textarea class="form-control" name="cauthaoluan" rows="3"></textarea>
+                                    </div>
+                                    <button type="button" onclick="DangThaoLuan()" class="btn btn-primary">Đăng</button>
+                                </div>
+                                @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                {
+                                    var thaoluan = db.ThongBaos.Where(x => x.IdLopHoc == Model.IdLopHoc).ToList();
+                                    foreach (var item in thaoluan)
+                                    {
+                                        <div style="border:1px solid #dee2e6 ; margin:10px 0;border-radius: 10px;">
+                                            <div style="padding:20px;">
+                                                <div>
+                                                    <b style="font-size:20px">@item.NguoiDung.TaiKhoan</b>
+                                                    <small>@item.NgayTao</small>
+                                                </div>
+                                                <br />
+                                                <div>
+                                                    @item.CauThaoLuan
+                                                </div>
+                                            </div>
+                                            <hr />
+                                            <div style="padding:0 20px">
+                                                <label class="sr-only" for="inlineFormInputGroup">Nhận xét của bạn</label>
+                                                <div class="input-group mb-2">
+                                                    <input type="text" class="form-control" name="bl@(item.IdThaoLuan)" id="" placeholder="Nhận xét cá nhân">
+                                                    <div class="input-group-prepend">
+                                                        <button class="input-group-text" onclick="BinhLuan(@item.IdThaoLuan)" style="border-radius: 20px;border-top-left-radius: 0;border-bottom-left-radius: 0;padding:0 20px">
+                                                            <i class="fas fa-paper-plane"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @{
+                                                var binhluan = db.BinhLuans.Where(x => x.IdThaoLuan == item.IdThaoLuan).ToList();
+                                                foreach (var bl in binhluan)
+                                                {
+                                                    <hr />
+                                                    <div class="row" style="padding:0 20px 20px">
+                                                        <div class="col-2" style="border-right:1px solid #dee2e6">
+                                                            <h5 class="text-center" style="margin:0">@bl.NguoiDung.HoTen</h5>
+                                                            <small>@bl.NgayBinhLuan</small>
+                                                        </div>
+                                                        <div class="col-9">@bl.NoiDung</div>
+                                                        <div class="col-1">
+                                                            <div class="dropdown show">
+                                                                <a class="dropdown-toggle text-center" href="#" role="button" id="dropdown+@item.IdThaoLuan" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                </a>
+
+                                                                <div class="dropdown-menu" aria-labelledby="dropdown+@item.IdThaoLuan">
+
+                                                                    @{var nd = (NguoiDung)Session["user"];
+                                                                        var lop = db.LopHocs.Where(x => x.IdLopHoc == Model.IdLopHoc).FirstOrDefault();
+
+                                                                        if (lop.IdNguoiDung == nd.IdNguoiDung)
+                                                                        {
+                                                                            <a class="dropdown-item" href="#">Xóa</a>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            if (bl.IdNguoiDung != nd.IdNguoiDung)
+                                                                            {
+                                                                                <a class="dropdown-item" href="#">Báo cáo</a>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <a class="dropdown-item" href="#">Xóa</a>
+                                                                            }
+
+                                                                        }
+
+                                                                    }
+
+
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                }
+                                            }
+
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                        @* tab 3 *@
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" style="padding:15px;margin:10px">
+                            <div>
+                                <div class="table-responsive">
+                                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Sinh Viên</th>
+                                                <th>Mã số sinh viên</th>
+                                                <th>Lớp</th>
+                                                <th>Ngày tham gia</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                            {
+                                                var nd = (NguoiDung)Session["user"];
+                                                var listlop = db.LopHocs.Where(x => x.IdNguoiDung == nd.IdNguoiDung).FirstOrDefault();
+
+                                                var lop = db.LopHocs.Where(x => x.IdLopHoc == Model.IdLopHoc).FirstOrDefault();
+                                                foreach (var item in lop.SVLops)
+                                                {
+                                                    <tr>
+
+                                                        <td>@item.SinhVien.NguoiDung.HoTen</td>
+                                                        <td>@item.SinhVien.Mssv</td>
+                                                        <td>@item.SinhVien.MaLopSv</td>
+                                                        <td>@(item.NgayThamGia == null ? "" : item.NgayThamGia.Value.ToString("dd/MM/yyyy"))</td>
+                                                        <td>
+                                                            @if (item.SinhVien.IdNguoiDung != nd.IdNguoiDung)
+                                                            {
+                                                                <div class="btn-group float-right" role="group">
+                                                                    <button type="button" class="btn btn-danger " onclick="XoaSVLop(@item.IdLopHoc,@item.IdSinhVien)"><i class="fa fa-trash"></i></button>
+                                                                </div>
+                                                            }
+
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        @* tab 4 *@
+                        <div class="tab-pane fade  show active" id="nav-baitap" role="tabpanel" aria-labelledby="nav-baitap-tab">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                int thutu = 0;
+                                var chitiet = db.CHITIET_CT_HOC.Where(x => x.IdCTHoc == Model.IdCTHoc).OrderBy(x => x.ThuTu).ThenBy(x => x.IdChiTiet).ToList();
+
+                                var nd = (NguoiDung)Session["user"];
+                                var lop = db.LopHocs.Where(x => x.IdLopHoc == Model.IdLopHoc).FirstOrDefault();
+                                foreach (var noidung in chitiet)
+                                {
+
+                                    string link = "";
+                                    <div class=" row chitiet-cthoc" id-chitiet="@noidung.IdChiTiet" thutu="@(thutu++)" style="border:1px solid #dee2e6 ; margin:10px 0; padding:10px;border-radius: 25px;">
+                                        <div class="col-1 text-center" style="border-right:0.5px solid #dee2e6">
+                                            @thutu
+                                        </div>
+                                        <div class="col-10">
+                                            @if (lop.IdNguoiDung != nd.IdNguoiDung)
+                                            {
+
+                                                if (noidung.TuLuan != null)
+                                                {
+                                                    link = "/Home/ThamGiaTuLuan/" + noidung.IdTuLuan;
+                                                    @noidung.TuLuan.TenTuLuan
+                                                }
+                                                else if (noidung.TracNghiem != null)
+                                                {
+                                                    link = "/Home/ThamGiaTracNghiem/" + noidung.IdTracNghiem;
+                                                    @noidung.TracNghiem.TenTracNghiem
+                                                }
+                                                else
+                                                {
+                                                    link = "/Home/ThamGiaBaiHoc/" + noidung.IdBaiHoc;
+                                                    @noidung.BaiHoc.TenBaiHoc
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (noidung.TuLuan != null)
+                                                {
+                                                    link = "/Home/ChiTietTuLuan/" + noidung.IdTuLuan;
+                                                    @noidung.TuLuan.TenTuLuan
+                                                }
+                                                else if (noidung.TracNghiem != null)
+                                                {
+                                                    link = "/Home/ChiTietTracNghiem/" + noidung.IdTracNghiem;
+                                                    @noidung.TracNghiem.TenTracNghiem
+                                                }
+                                                else
+                                                {
+                                                    link = "/Home/ChiTietBaiHoc/" + noidung.IdBaiHoc;
+                                                    @noidung.BaiHoc.TenBaiHoc
+                                                }
+                                            }
+                                        </div>
+                                        <div class="col-1 text-center" style="border-left:0.5px solid #dee2e6">
+                                            @{
+                                                var ct = chitiet.FirstOrDefault();
+                                                if (ct != null && ct.NgayBatDau != null)
+                                                {
+                                                    if (ct.NgayBatDau < DateTime.Now)
+                                                    {
+                                                        <a onclick="KhongTryCap()"><i class="fas fa-info-circle"></i></a>
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <a role="button" href="javascript:void(0);" onclick="VaoHoc('@link')"><i class="fas fa-info-circle"></i></a>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <a href="#" onclick="KhongTryCap()"><i class="fas fa-info-circle"></i></a>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+
+<script>
+    var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
+</script>
+<script>
+    function VaoHoc(link) {
+        if (!confirm("Xác nhận vào nội dung này?")) return;
+        location.href = link;
+    }
+    $("#turn_on").click(function () {
+        $(".item_option").toggle();
+    });
+
+    function DangThaoLuan() {
+        var idlophoc =@Model.IdLopHoc;
+        var cauthaoluan = $("[name='cauthaoluan']").val();
+        if (cauthaoluan == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostThaoLuan',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                cauthaoluan,
+                idlophoc,
+                idnguoidung
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function BinhLuan(id) {
+        var idthaoluan = id;
+        var idbaihoc = 0;
+        var noidung = $("[name='bl"+id+"']").val();
+        if (noidung == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostBinhLuan',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idthaoluan,
+                noidung,
+                idnguoidung,
+                idbaihoc
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function XoaSVLop(IdLopHoc, IdSinhVien) {
+        var dialog = bootbox.dialog({
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        $.ajax({
+                            url: '/Ajax/XoaSVLop/',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                IdLopHoc, IdSinhVien
+                            },
+                        }).done(function (ketqua) {
+                            if (ketqua.Success) {
+                                alert("Xóa thành công");
+                                location.reload();
+                                return;
+                            }
+                            alert(ketqua.Message);
+                        });
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+    function SaveInfo(IdLopHoc) {
+        var _inputidsinhvien = $("#idsinhvien");
+        var IdSinhVien = _inputidsinhvien.val();
+        if (idsinhvien == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostSVLop',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdLopHoc, IdSinhVien
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function KhongTryCap() {
+        $.notify("Nội dung hiện chưa mở", "warn");
+    }
+</script>

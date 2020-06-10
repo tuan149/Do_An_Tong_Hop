@@ -1,0 +1,253 @@
+﻿@model ToMoToStudy.BaiHoc
+
+@{
+    ViewBag.Title = "ChiTietBaiHoc";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="alert alert-success" role="alert" style="margin:10px 0">
+        Bài học này được tạo bởi <b>@Model.NguoiDung.HoTen</b>
+        <br>
+    </div>
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Thông tin bài học</a>
+                            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Danh sách bài nộp</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        @* tab 1 *@
+                        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                            <div class="form-horizontal">
+                                <div class="form-group">
+                                    Tên bài học
+                                    <div>
+                                        @Html.EditorFor(model => model.TenBaiHoc, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col form-group">
+                                        Cho phép nộp bài
+                                        <div>
+                                            @Html.EditorFor(model => model.ChoPhepNopBai, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="col form-group">
+                                        Video
+                                        <div>
+                                            @Html.EditorFor(model => model.Video, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    Nội dung
+                                    <div>
+                                        <textarea class="form-control" name="noidung">@Model.NoiDung</textarea>
+                                        <script>
+                                            CKEDITOR.replace('noidung');
+                                        </script>
+                                    </div>
+                                </div>
+                               
+                                <div class="form-group">
+                                    <div class="col-md-offset-2 ">
+                                        <button type="submit" class="btn btn-primary">Lưu</button>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        @* tab 2 *@
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" style="padding:15px;margin:10px">
+                            <div class="float-right">
+                                <button type="button" class="btn btn-primary" onclick="ThemFile()"><i style="margin-right:10px" class="fas fa-plus"></i>File học viên</button>
+                            </div>
+                            <br />
+                            <div style="padding: 15px">
+                                <hr />
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Danh sách</h6>
+                                </div>
+                                <div id="divListQuestion">
+                                    <div class="table-responsive p-3" style="padding: 15px">
+                                        <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Sinh viên</th>
+                                                    <th>Mssv</th>
+                                                    <th>File nộp bài</th>
+                                                    <th>Ngày nộp</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                                {
+                                                    int i = 1;
+
+                                                    var filebaihoc = db.FileHocViens.Where(x => x.IdBaiHoc == Model.IdBaiHoc).ToList();
+                                                    foreach (var item in filebaihoc)
+                                                    {
+                                                         <tr>
+                                                            <td>@(i++)</td>
+                                                            <td>@item.SinhVien.NguoiDung.HoTen</td>
+                                                            <td>@item.SinhVien.Mssv</td>
+                                                            <td><a href="@item.Link">@item.NoiDung</a></td>
+                                                            <td>@item.NgayTao</td>
+                                                            <td>
+                                                                <div class="btn-group float-right" role="group">
+                                                                    <button type="button" class="btn btn-danger" onclick="XoaFileHocVien(@item.IdFileHocVien)"><i class="fa fa-trash"></i></button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="addTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle">Thêm</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Link</label>
+                        <input type="text" class="form-control" name="link">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Nội dung</label>
+                        <input type="text" class="form-control" name="noidungsave">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Sinh viên nộp</label>
+                        <select name="idsinhvien" class="form-control select">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                foreach (var item in db.SinhViens.ToList())
+                                {
+                                    <option value="@item.IdSinhVien">@item.NguoiDung.HoTen - @item.Mssv</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function ThemFile() {
+        idfilehocvien = 0;
+        $("#addTitle").html("Thêm mới");
+        $("[name='link']").val("");
+        //$("[name='ngaytao']").val("");
+        $("[name='noidungsave']").val("");
+        //$("[name='idbaihoc']").val("");
+        $("[name='idsinhvien']").val("");
+        $('#modalAdd').modal("show");
+    }
+
+    function SaveInfo() {
+        var link = $("[name='link']").val();
+        //var ngaytao = $("[name='ngaytao']").val();
+        var noidung = $("[name='noidungsave']").val();
+        var idbaihoc = @Model.IdBaiHoc;
+        var idsinhvien = $("[name='idsinhvien']").val();
+        if (idbaihoc == '' || idsinhvien == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostFileHocVien',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                link,
+                //ngaytao,
+                noidung,
+                idbaihoc,
+                idsinhvien
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+    function XoaFileHocVien(idfilehocvien) {
+        var dialog = bootbox.dialog({
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        dialog = bootbox.dialog({
+                            closeButton: false,
+                            message: '<center><i class="fa fa-spin fa-spinner"></i> Đang thực hiện...</center>'
+                        });
+                        dialog.init(function () {
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: '/Ajax/XoaFileHocVien/' + idfilehocvien,
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    data: {
+                                        idfilehocvien
+                                    },
+                                }).done(function (ketqua) {
+                                    if (ketqua.Success) {
+                                        alert("Xóa thành công");
+                                        location.reload();
+                                        return;
+                                    }
+                                    alert(ketqua.Message);
+                                });
+                            }, 1000);
+                        });
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+</script>
