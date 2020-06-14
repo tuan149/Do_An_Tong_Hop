@@ -69,7 +69,7 @@
         if (nd != null)
         {
             var listlop = db.LopHocs.Where(x => x.SVLops.Any(i => i.SinhVien.IdNguoiDung == nd.IdNguoiDung)).ToList();
-            <center><h4 style="background-color:whitesmoke;padding:5px;margin-top:50px">Các lớp tham gia</h4></center>
+            <center><h4 style="background-color:whitesmoke;padding:20px 0;margin-top:50px">Các lớp tham gia</h4></center>
             <br />
             <div class="row card-main" style="width:100%;">
                 @foreach (var item in listlop)

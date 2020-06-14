@@ -10,7 +10,7 @@
         Bài học: @Model.TenBaiHoc
     </div>
     <div class="row">
-        <div class="col-9" style="padding:10px">
+        <div class="col-sm-9 col12" style="padding:10px">
 
           
             @if(Model.Video!=null)
@@ -64,13 +64,18 @@
 
             </div>
         </div>
-        <div class="col-3" style="padding:10px">
-            <div class="form-group align-self-center"  style="border:1px solid #dee2e6;border-radius: 10px;">
-                <input type="file" id="selectedFile" style="display: none;" />
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('selectedFile').click();"><i class="fas fa-plus"></i> Chọn file</button>
-                <br />
-                <button type="button" class="btn btn-primary">Gửi lên</button>
-            </div>
+        <div class="col-sm-3 col-12" style="padding:10px">
+            <form id="uploadFileExcel" enctype="multipart/form-data">
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupTL">
+                        <label class="custom-file-label" for="inputGroupTL">...</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Tải lên</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

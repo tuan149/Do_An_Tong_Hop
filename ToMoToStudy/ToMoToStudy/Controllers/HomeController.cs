@@ -14,7 +14,7 @@ namespace ToMoToStudy.Controllers
         {
             return View();
         }
-
+            
         public ActionResult About()
         {
             return View();
@@ -251,6 +251,34 @@ namespace ToMoToStudy.Controllers
         public ActionResult ChuongTrinhHoc()
         {
             if (Session["user"] is null) return RedirectToAction("Index");
+            return View();
+        }
+
+        public ActionResult LuuTru()
+        {
+            if (Session["user"] is null) return RedirectToAction("Index");
+            return View();
+        }
+
+        public ActionResult BaiLamTuLuan(int? IdLopHoc,int? IdNoiDung)
+            {
+            if (Session["user"] is null) return RedirectToAction("Index");
+            ViewBag.IdLopHoc = IdLopHoc;
+            ViewBag.IdTuLuan = IdNoiDung;
+            return View();
+        }
+        public ActionResult BaiLamTracNghiem(int? IdLopHoc, int? IdNoiDung)
+        {
+            if (Session["user"] is null) return RedirectToAction("Index");
+            ViewBag.IdLopHoc = IdLopHoc;
+            ViewBag.IdTracNghiem = IdNoiDung;
+            return View();
+        }
+        public ActionResult BaiLamBaiHoc(int? IdLopHoc, int? IdNoiDung)
+        {
+            if (Session["user"] is null) return RedirectToAction("Index");
+            ViewBag.IdLopHoc = IdLopHoc;
+            ViewBag.IdBaiHoc = IdNoiDung;
             return View();
         }
     }

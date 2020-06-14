@@ -20,7 +20,7 @@
             @using (ToMoToDBEntities db = new ToMoToDBEntities())
             {
                 var nd = (NguoiDung)Session["user"];
-                var listlop = db.LopHocs.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList();
+                var listlop = db.LopHocs.Where(x => x.IdNguoiDung == nd.IdNguoiDung && x.TinhTrang == 1).ToList();
                 foreach (var item in listlop)
                 {
                     <div class="card2 border-card mb-3" style="max-width: 18rem;min-height:220px">

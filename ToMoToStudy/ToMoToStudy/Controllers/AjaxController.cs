@@ -98,6 +98,9 @@ namespace ToMoToStudy.Controllers
         [HttpPost]
         public JsonResult GuiMailMatKhau(NguoiDung data)
         {
+            SendMail.EmailUser = "tomotochacha@gmail.com";
+            SendMail.EmailPassword = "tuan1491998";
+            SendMail.EmailName = "ToMoTo - Quản lý lớp học trực tuyến";
             ApiResult result = new ApiResult();
             if (data is null)
             {
@@ -130,6 +133,19 @@ namespace ToMoToStudy.Controllers
                             {
                                 db.SaveChanges();
                                 result.Success = true;
+                                string body = @" <div style='width:600px;border: 1px solid black;'>
+                                                <div style='background-color:rgb(13, 213, 240);padding: 10px;'>
+                                                    <center><h2 style='margin:auto;'>Cấp lại mật khẩu</h2></center>
+                                                </div>
+                                                <div style='padding: 20px;'>
+                                                    <p>Xin cấp lại mật khẩu cho tài khoản: {0}</p>
+                                                    <p>Mật khẩu mới của bạn là: <b>{1}</b></p>
+                                                    <p>Vui lòng đăng nhập và đổi mật khẩu mới</p>
+                                                </div>
+
+                                            </div>";
+                                body = String.Format(body, tk.TaiKhoan, tk.MatKhau);
+                                SendMail.Send(data.Email, "Cấp lại mật khẩu ", body);
                             }
                             catch (Exception ex)
                             {
@@ -152,6 +168,41 @@ namespace ToMoToStudy.Controllers
             }
             return Json(result);
         }
+
+        [HttpPost]
+        public JsonResult DoiMatKhau(NguoiDung data,string mkmoi)
+        {
+            ApiResult result = new ApiResult();
+            if (data is null)
+            {
+                result.Message = "Vui lòng điền đầy đủ thông tin bên trên";
+                return Json(result);
+            }
+            using (ToMoToDBEntities db = new ToMoToDBEntities())
+            {
+                NguoiDung tk = db.NguoiDungs.Where(x => x.IdNguoiDung == data.IdNguoiDung && x.MatKhau == data.MatKhau).FirstOrDefault();
+                if(tk!=null)
+                {
+                    tk.MatKhau = mkmoi;
+                    try
+                    {
+                        db.SaveChanges();
+                        result.Success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        result.Message = ex.Message;
+                    }
+                }
+                else
+                {
+                    result.Message = "Sai mật khẩu cũ";
+                    return Json(result);
+                }
+            }
+            return Json(result);
+        }
+
 
 
         public JsonResult GetVaiTro(int id)
@@ -488,6 +539,42 @@ namespace ToMoToStudy.Controllers
             }
             return Json(result);
         }
+
+        [HttpPost]
+        public JsonResult TrinhTrangLopHoc(LopHoc data)
+        {
+            ApiResult result = new ApiResult();
+            if (data is null)
+            {
+                result.Message = "Vui lòng điền đầy đủ thông tin bên trên";
+                return Json(result.Data);
+            }
+            using (ToMoToDBEntities db = new ToMoToDBEntities())
+            {
+                LopHoc lh = new LopHoc();
+                // chỉnh sửa tk
+                if (data.IdLopHoc > 0) lh = db.LopHocs.Where(x => x.IdLopHoc == data.IdLopHoc).FirstOrDefault();
+                if (lh is null)
+                {
+                    result.Message = "Vui lòng thử lại";
+                    return Json(result);
+                }
+               
+                lh.TinhTrang = data.TinhTrang;
+               
+                try
+                {
+                    db.SaveChanges();
+                    result.Success = true;
+                }
+                catch (Exception ex)
+                {
+                    result.Message = ex.Message;
+                }
+            }
+            return Json(result);
+        }
+
         [HttpPost]
         public JsonResult PostSVLop(SVLop data)
         {
@@ -500,9 +587,7 @@ namespace ToMoToStudy.Controllers
 
             using (ToMoToDBEntities db = new ToMoToDBEntities())
             {
-
                 SVLop svlop = new SVLop();
-
                 // chỉnh sửa tk
                 //if (data.IdLopHoc > 0) svlop = db.SVLops.Where(x => x.IdLopHoc == data.IdLopHoc).FirstOrDefault();
                 if (svlop is null)
@@ -1188,8 +1273,6 @@ namespace ToMoToStudy.Controllers
             return Json(result);
         }
 
-
-
         [HttpPost]
         public void PostCapNhatThuTu(SuaThuTuModel data)
         {
@@ -1289,6 +1372,12 @@ namespace ToMoToStudy.Controllers
                 {
                     Session["loai"] = user.IdVaiTro;
                     Session["user"] = user;
+                    if(Session["loai"].ToString() == "1")
+                    {
+                        Session.Clear();
+                        result.Message = "Đăng nhập thất bại";
+                        return Json(result);
+                    }    
                     result.Success = true;
                 }
                 catch (Exception ex)

@@ -93,15 +93,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div>
 
-                                            <label>
-                                                <input type="checkbox" value="@Model.MoTa" id="TinhTrang">
-                                                <input type="checkbox" class="custom-control-input" id="tn-@Model.TinhTrang" @(Model.TinhTrang == 1 ? "checked" : "") onchange="SaveDapAnDung()">
-                                                Tình trạng hoạt động
-                                            </label>
-
-                                            <asp:CheckBox ID="TinhTrang" runat="server" value="Red" />
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="lop-@Model.IdLopHoc" @(Model.TinhTrang == 1 ? "checked" : "") onchange="SaveTinhTrang(@Model.IdLopHoc)">
+                                            <label class="custom-control-label" for="lop-@Model.IdLopHoc">Trạng thái</label>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -150,7 +145,7 @@
                                         <div style="border:1px solid #dee2e6 ; margin:10px 0;border-radius: 10px;">
                                             <div style="padding:20px;">
                                                 <div>
-                                                    <b style="font-size:20px">@item.NguoiDung.TaiKhoan</b>
+                                                    <b style="font-size:20px">@item.NguoiDung.HoTen</b>
                                                     <small>@item.NgayTao</small>
                                                 </div>
                                                 <br />
@@ -279,13 +274,14 @@
                             {
                                 int thutu = 0;
                                 var chitiet = db.CHITIET_CT_HOC.Where(x => x.IdCTHoc == Model.IdCTHoc).OrderBy(x => x.ThuTu).ThenBy(x => x.IdChiTiet).ToList();
-
+                                string link = "";
+                                int idbai = 0;
                                 var nd = (NguoiDung)Session["user"];
                                 var lop = db.LopHocs.Where(x => x.IdLopHoc == Model.IdLopHoc).FirstOrDefault();
                                 foreach (var noidung in chitiet)
                                 {
 
-                                    string link = "";
+
                                     <div class=" row chitiet-cthoc" id-chitiet="@noidung.IdChiTiet" thutu="@(thutu++)" style="border:1px solid #dee2e6 ; margin:10px 0; padding:10px;border-radius: 25px;">
                                         <div class="col-1 text-center" style="border-right:0.5px solid #dee2e6">
                                             @thutu
@@ -293,61 +289,80 @@
                                         <div class="col-10">
                                             @if (lop.IdNguoiDung != nd.IdNguoiDung)
                                             {
-
+                                                
                                                 if (noidung.TuLuan != null)
                                                 {
+                                                    string ten = noidung.TuLuan.TenTuLuan ?? "";
+                                                    ten = System.Text.RegularExpressions.Regex.Replace(ten, "<.*?>", String.Empty);
+                                                    if (ten.Length > 300)
+                                                    {
+                                                        ten = ten.Substring(0, 100) + "...";
+                                                    }
+
                                                     link = "/Home/ThamGiaTuLuan/" + noidung.IdTuLuan;
-                                                    @noidung.TuLuan.TenTuLuan
+                                                    <p style="display:inline">Bài tự luận - @ten </p>
                                                 }
                                                 else if (noidung.TracNghiem != null)
                                                 {
                                                     link = "/Home/ThamGiaTracNghiem/" + noidung.IdTracNghiem;
-                                                    @noidung.TracNghiem.TenTracNghiem
+
+                                                    <p style="display:inline">Bài trắc nghiệm - @noidung.TracNghiem.TenTracNghiem</p>
                                                 }
                                                 else
                                                 {
                                                     link = "/Home/ThamGiaBaiHoc/" + noidung.IdBaiHoc;
-                                                    @noidung.BaiHoc.TenBaiHoc
+                                                    <p style="display:inline">Bài học - @noidung.BaiHoc.TenBaiHoc</p>
                                                 }
                                             }
                                             else
                                             {
                                                 if (noidung.TuLuan != null)
                                                 {
-                                                    link = "/Home/ChiTietTuLuan/" + noidung.IdTuLuan;
-                                                    @noidung.TuLuan.TenTuLuan
+                                                    link = "BaiLamTuLuan";
+                                                    idbai = noidung.IdTuLuan.Value;
+                                                    <p style="display:inline">Bài tự luận - @noidung.TuLuan.TenTuLuan</p>
                                                 }
                                                 else if (noidung.TracNghiem != null)
                                                 {
-                                                    link = "/Home/ChiTietTracNghiem/" + noidung.IdTracNghiem;
-                                                    @noidung.TracNghiem.TenTracNghiem
+                                                    link = "BaiLamTracNghiem";
+                                                    idbai = noidung.IdTracNghiem.Value;
+                                                    <p style="display:inline">Bài trắc nghiệm - @noidung.TracNghiem.TenTracNghiem</p>
                                                 }
                                                 else
                                                 {
-                                                    link = "/Home/ChiTietBaiHoc/" + noidung.IdBaiHoc;
-                                                    @noidung.BaiHoc.TenBaiHoc
+                                                    link = "BaiLamBaiHoc";
+                                                    idbai = noidung.IdBaiHoc.Value;                                                    
+                                                    <p style="display:inline">Bài học - @noidung.BaiHoc.TenBaiHoc</p>
                                                 }
                                             }
                                         </div>
-                                        <div class="col-1 text-center" style="border-left:0.5px solid #dee2e6">
+                                        <div class="col-1 text-center" style="border-left:0.5px solid #dee2e6;background-color:#dee2e6;padding:0;border-radius:0 10px 10px 0">
                                             @{
                                                 var ct = chitiet.FirstOrDefault();
-                                                if (ct != null && ct.NgayBatDau != null)
+                                                if (lop.IdNguoiDung == nd.IdNguoiDung)
                                                 {
-                                                    if (ct.NgayBatDau < DateTime.Now)
-                                                    {
-                                                        <a onclick="KhongTryCap()"><i class="fas fa-info-circle"></i></a>
-
-                                                    }
-                                                    else
-                                                    {
-                                                        <a role="button" href="javascript:void(0);" onclick="VaoHoc('@link')"><i class="fas fa-info-circle"></i></a>
-                                                    }
+                                                    <a style="display:block" href="@Url.Action(link, "Home", new { IdLopHoc = Model.IdLopHoc,IdNoiDung=idbai })"><i class="fas fa-angle-double-right "></i></a>
                                                 }
                                                 else
                                                 {
-                                                    <a href="#" onclick="KhongTryCap()"><i class="fas fa-info-circle"></i></a>
+                                                    if (ct != null && ct.NgayBatDau != null)
+                                                    {
+                                                        if (ct.NgayBatDau < DateTime.Now)
+                                                        {
+                                                            <a style="height:100%;position:absolute;display:block" onclick="KhongTryCap()"><i class="fas fa-angle-double-right "></i></a>
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <a role="button" style="display:block" href="javascript:void(0);" onclick="VaoHoc('@link')"><i class="fas fa-angle-double-right "></i></a>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="#" onclick="KhongTryCap()"><i class="fas fa-angle-double-right"></i></a>
+                                                    }
                                                 }
+
                                             }
                                         </div>
                                     </div>
@@ -367,6 +382,35 @@
     var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
 </script>
 <script>
+
+    function SaveTinhTrang(idlophoc) {
+        var _checkbox = $("#lop-" + idlophoc);
+        if (_checkbox.is(":checked")) {
+            var tinhtrang = 1;
+        }
+        else {
+            var tinhtrang = 0;
+        }
+        $.ajax({
+            url: '/Ajax/TrinhTrangLopHoc',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idlophoc,
+                tinhtrang,
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                $.notify("Thay đổi tình trạng thành công !", "success");
+                location.reload();
+                return;
+            }
+            $.notify(ketqua.Message, "error");
+        });
+    }
+
     function VaoHoc(link) {
         if (!confirm("Xác nhận vào nội dung này?")) return;
         location.href = link;
@@ -468,6 +512,7 @@
             }
         });
     }
+
     function SaveInfo(IdLopHoc) {
         var _inputidsinhvien = $("#idsinhvien");
         var IdSinhVien = _inputidsinhvien.val();

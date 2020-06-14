@@ -157,6 +157,7 @@
     </Compile>
     <Compile Include="Helper\RandomChuoi.cs" />
     <Compile Include="Helper\RandomTracNghiem.cs" />
+    <Compile Include="Helper\SendMail.cs" />
     <Compile Include="Khoa.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -2024,6 +2025,7 @@
     </Content>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\dataTables.bootstrap4.min.js" />
+    <Content Include="Scripts\dataTables.buttons.min.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
     <Content Include="Scripts\jquery-3.4.1.slim.js" />
@@ -2041,6 +2043,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\notify.min.js" />
     <Content Include="Scripts\Sortable.js" />
+    <Content Include="Style\all.min.css" />
     <Content Include="Style\bootbox.all.min.js" />
     <Content Include="Style\jquery.dataTables.min.css" />
     <Content Include="Style\main.js" />
@@ -2099,6 +2102,9 @@
     <Content Include="Views\Home\ThamGiaBaiHoc.cshtml" />
     <Content Include="Views\Home\ChuongTrinhHoc.cshtml" />
     <Content Include="Views\Home\LayLaiMatKhau.cshtml" />
+    <Content Include="Views\Home\LuuTru.cshtml" />
+    <Content Include="Views\Home\BaiLamTuLuan.cshtml" />
+    <Content Include="Views\Home\BaiLamTracNghiem.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

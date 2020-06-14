@@ -19,9 +19,6 @@
         var listCauHoi = tracnghiem.TracNghiem_CauHoi.ToList();
         listCauHoi.Shuffle();
 
-
-
-
         foreach (var item in listCauHoi)
         {
             var TNdapan = db.TracNghiem_DapAn.Where(x => x.IdCauHoi == item.IdCauHoi).ToList();
@@ -91,8 +88,7 @@
     $(document).ready(function () {
         $(function () {
             $("#demnguoc").countdowntimer({
-                minutes: 0,
-                seconds: 3,
+                minutes: @Model.ThoiGian,
                 size: "lg",
                 timeUp: HetGio
             });

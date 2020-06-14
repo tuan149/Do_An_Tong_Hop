@@ -13,8 +13,11 @@ body {
 .text-color {
     color: var(--text-color);
 }
+.navbar-dark .navbar-nav .nav-link {
+    color:black;
+}
 
-a.text-color:hover {
+a .text-color:hover {
     color: black;
 }
 
@@ -346,4 +349,12 @@ h5.card-title {
 
 .dropdown-toggle::after{
     display: none!important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    /* margin-left: 0.5em; */
+    margin:0 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding:0 !important;
 }
