@@ -1,0 +1,208 @@
+﻿
+@{
+    ViewBag.Title = "DanhSachSinhVien";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách sinh viên</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Quản lý</li>
+            <li class="breadcrumb-item active" aria-current="page">Sinh Viên</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" onclick="ThemSinhVien()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tài khoản</th>
+                                <th>MSSV</th>
+                                <th>Mã lớp</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var sinhvien = db.SinhViens.ToList();
+                                foreach (var item in sinhvien)
+                                {
+                                    <tr>
+                                        <td>@(item.IdNguoiDung == null ? "" : item.NguoiDung.TaiKhoan)</td>
+                                        <td>@item.Mssv</td>
+                                        <td>@item.MaLopSv</td>
+                                        <td>
+                                            <div class="btn-group float-right" role="group">
+                                                <button type="button" class="btn btn-primary" onclick="SuaSinhVien(@item.IdSinhVien)"><i class="fa fa-edit"></i></button>
+                                                <button type="button" class="btn btn-danger" onclick="XoaSinhVien(@item.IdSinhVien)"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle"></h5>
+
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Tài khoản</label>
+                        <select name="nguoidung" class="form-control select">
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                foreach (var item in db.NguoiDungs.ToList())
+                                {
+                                    <option value="@item.IdNguoiDung">@item.TaiKhoan</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Mssv</label>
+                        <input type="text" class="form-control" name="mssv">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Mã lớp sv</label>
+                        <input type="text" class="form-control" name="malopsv">
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var idsinhvien = 0;
+
+    function ThemSinhVien() {
+        idsinhvien = 0;
+        $("#addTitle").html("Thêm");
+        $("[name='mssv']").val("");
+        $("[name='malopsv']").val("");
+        $("[name='nguoidung']").val("");
+        $('#modalAdd').modal("show");
+    }
+
+    function SuaSinhVien(id) {
+        idsinhvien = id;
+        $.ajax({
+            url: '/Ajax/GetSinhVien/' + idsinhvien,
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                id: idsinhvien,
+            }
+        }).done(function (ketqua) {
+            var json = JSON.parse(ketqua);
+            $("#addTitle").html("Chỉnh sửa");
+            $("[name='mssv']").val(json.mssv);
+            $("[name='malopsv']").val(json.malopsv);
+            $("[name='nguoidung']").val(json.nguoidung);
+            $('#modalAdd').modal("show");
+        });
+    }
+
+    function XoaSinhVien(IdSinhVien) {
+        var dialog = bootbox.dialog({
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        dialog = bootbox.dialog({
+                            closeButton: false,
+                            message: '<p><i class="fa fa-spin fa-spinner"></i> Đang thực hiện...</p>'
+                        });
+
+                        dialog.init(function () {
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: '/Ajax/XoaSinhVien/' + IdSinhVien,
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    data: {
+                                        IdSinhVien
+                                    },
+                                }).done(function (ketqua) {
+                                    if (ketqua.Success) {
+                                        alert("Xóa thành công");
+                                        location.reload();
+                                        return;
+                                    }
+                                    alert(ketqua.Message);
+                                });
+                            }, 1000);
+                        });
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+
+    function SaveInfo() {
+        var mssv = $("[name='mssv']").val();
+        var malopsv = $("[name='malopsv']").val();
+        var nguoidung = $("[name='nguoidung']").val();
+        if (mssv == '' || malopsv == '' || nguoidung == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostSinhVien',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdSinhVien: idsinhvien,
+                Mssv: mssv,
+                MaLopSv: malopsv,
+                IdNguoiDung: nguoidung,
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

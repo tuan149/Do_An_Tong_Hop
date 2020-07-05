@@ -1,0 +1,75 @@
+﻿@{
+    int IdSV = (int)ViewBag.IdSinhVien;
+    int IdTL = (int)ViewBag.IdTuLuan;
+    int IdLop = (int)ViewBag.IdLop;
+}
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    int idlop = IdLop;
+    int idtuluan = IdTL;
+    int i = 1;
+    var tuluan = db.TuLuans.Where(x => x.IdTuLuan == idtuluan).FirstOrDefault();
+    var dsCauHoi = tuluan.TuLuan_CauHoi.ToList();
+    //List<SinhVien> lstSinhVien = new List<SinhVien>();
+    foreach (var cauhoi in dsCauHoi)
+    {
+        foreach (var dapancuaSinhVien in cauhoi.SinhVien_TL_DapAn.Where(x => x.IdSinhVien == IdSV))
+        {
+            var sinhVien = dapancuaSinhVien.SinhVien;
+            if (!sinhVien.SVLops.Any(x => x.IdLopHoc == idlop))
+            {
+                continue;
+            }
+            string noidung = dapancuaSinhVien.DapAn ?? "";
+            noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+
+            string ch = cauhoi.CauHoiTuLuan ?? "";
+            ch = System.Text.RegularExpressions.Regex.Replace(ch, "<.*?>", String.Empty);
+            <div class="card" style="margin-bottom:20px;box-shadow: 5px 5px 10px;">
+                <div class="card-header text-primary">
+                    Câu @(i++)
+                </div>
+                <div class="card-body">
+                    <p class="card-text ">@Html.Raw(ch)</p>
+                    <label style="margin:0">Câu trả lời:</label>
+                    <div style="margin:10px 0;border:1px solid #c6c6c6;padding:10px">@Html.Raw(noidung)</div>
+                    <div class="input-group col-12 col-lg-5 float-right align-self-end p-0">
+                        <input type="number" class="form-control" value="@(dapancuaSinhVien.DiemTuLuan==null ? "":dapancuaSinhVien.DiemTuLuan+"")" name="diemtuluan@(cauhoi.IdCauHoiTuLuan)" required>
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-primary" onclick="ChamDiemTuLuan(@cauhoi.IdCauHoiTuLuan,@IdSV,@idlop)">Chấm điểm</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+
+}
+
+<script>
+    function ChamDiemTuLuan(idcauhoituluan, idsinhvien,idlop) {
+        var diemtuluan = $("[name='diemtuluan" + idcauhoituluan + "']").val();
+        $.ajax({
+            url: '/Ajax/ChamDiemTuLuan',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idcauhoituluan,
+                idsinhvien,
+                diemtuluan,
+            },
+        }).done(function (ketqua) {
+            if (ketqua.Success) {
+                DSDapAn(idsinhvien, @IdTL, idlop);
+                $.notify("Lưu điểm thành công", "success");
+                return;
+            }
+            alert(ketqua.Message);
+            
+        });
+
+    }
+</script>

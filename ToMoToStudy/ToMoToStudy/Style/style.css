@@ -1,0 +1,360 @@
+﻿@import url('style.css');
+:root {
+    --bg-color: #d7385e;
+    --bg-color-drop: #ff3f6d;
+    --text-color: #d7385e;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    background-attachment: fixed;
+}
+.text-color {
+    color: var(--text-color);
+}
+.navbar-dark .navbar-nav .nav-link {
+    color:black;
+}
+
+a .text-color:hover {
+    color: black;
+}
+
+body {
+    padding: 0;
+    height: 100%;
+}
+
+.bg-color {
+    background-color: var(--bg-color) !important;
+}
+
+.bg-color-drop {
+    background-color: var(--bg-color-drop);
+}
+
+.text-color{
+    color:var(--bg-color);
+}
+
+.fixcolor {
+    color: black;
+}
+
+.btn:focus {
+    box-shadow: 0 0 10px grey;
+}
+/* ---------navbar -------------*/
+.top-nav {
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: black;
+}
+
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: #ffffff;
+    }
+
+.dropdown-item:hover {
+    display: block;
+    width: 100%;
+    padding: .25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: #d7385e;
+    border: 0;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: black;
+    float: left;
+}
+
+    .navbar-dark .navbar-nav .nav-link:focus,
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: #ffffff;
+    }
+
+.navbar-dark .navbar-toggler {
+    color: black;
+    border-color: black;
+}
+
+.navbar-toggler {
+    background-color: #ff3f6d;
+}
+
+.navbar-dark .navbar-nav .show > .nav-link {
+    color: #ffffff;
+}
+
+.dropdown-divider {
+    border-top: 1px solid black;
+}
+
+shadow-cards {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+
+/*-------------- Login -------------*/
+
+
+
+/* Change styles for span and cancel button on extra small screens */
+
+@media screen and (max-width: 500px) {
+    span.psw {
+        display: block;
+        float: none;
+    }
+
+    .card-main {
+        margin: auto;
+    }
+
+    .cancelbtn {
+        width: 100%;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto 15% auto;
+        /* 5% from the top, 15% from the bottom and centered */
+        border: 1px solid #888;
+        width: 90%;
+        /* Could be more or less, depending on screen size */
+        border-radius: 10px;
+    }
+
+    .btn-group-login button {
+        width: 100%;
+    }
+}
+
+.form-login {
+    margin: 20px;
+}
+
+.btn-login-info {
+    color: black;
+    background-color: #ff9bb2;
+    border-color: white;
+    width: 100%;
+    margin-top: 10px;
+}
+
+    .btn-login-info:hover {
+        opacity: 0.7;
+        transition: 0.3S;
+    }
+
+#forgot-pass {
+    position: relative;
+    top: 10px;
+}
+
+.login-color,
+.login-hover-color:hover {
+    color: black !important;
+    background-color: var(--bg-color) !important;
+}
+
+.btn-group-login button {
+    background-color: white;
+    /* background */
+    border: 1px solid var(--bg-color);
+    /* border */
+    color: black;
+    /* White text */
+    padding: 10px 24px;
+    /* Some padding */
+    cursor: pointer;
+    /* Pointer/hand icon */
+    float: left;
+    /* Float the buttons side by side */
+}
+
+
+/*----------End Login -------------*/
+
+.card2 {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid var(--bg-color);
+    border-radius: .25rem;
+    width: 255px;
+    margin: 0px 10px 10px 10px;
+    cursor: pointer;
+    transition: transform .2s;
+}
+
+    .card2:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px;
+    }
+
+.card-header {
+    padding: .30rem 1.25rem;
+    margin-bottom: 0;
+    color: black;
+    background-color: white;
+    border-bottom: 1.5px solid rgba(0, 0, 0, .125);
+    font-size: 20px;
+}
+
+p.card-text {
+    color: black;
+}
+
+h5.card-title {
+    color: var(--bg-color);
+}
+
+
+/*-------- Banner ----------*/
+
+.banner-image {
+    background-image: linear-gradient(to top, #811c33 0%, #d7385e 80%);
+    background-color: #cccccc;
+    height: 400px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
+.banner-text {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+@media only screen and (max-width: 600px) {
+    .banner-image {
+        display: none;
+    }
+}
+
+
+/* End Banner */
+
+.item-user {
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.item-avatar {
+    margin-top: 10px;
+    text-align: center;
+}
+
+    .item-avatar img {
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        margin-top: 10px;
+    }
+
+.list-content {
+    padding-left: 0;
+    list-style: none;
+}
+
+    .list-content hr {
+        margin: 0;
+    }
+
+    .list-content li a {
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        color: white;
+    }
+
+        .list-content li a:hover {
+            background-color: var(--bg-color-drop);
+            color: white;
+        }
+
+.item {
+    margin-top: 20px;
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    color: white;
+}
+
+.item-page {
+    padding: 20px;
+}
+
+
+#inlineFormInputGroup {
+    border-radius: 1.1875rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.input-group-text {
+    border-radius: 20px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.head-noti {
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 2px 6px 2px rgba(60,64,67,0.149);
+    padding: 10px;
+    border-radius:10px;
+}
+.banner-class {
+    background-image: url('/HinhAnh/Banner/BannerClass.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    height: 300px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.table.dataTable.no-footer {
+    border-bottom: none;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0;
+    margin: 0;
+}
+
+.custom-file-input ~ .custom-file-label::after {
+    content: "Chọn File";
+}
+
+.dropdown-toggle::after{
+    display: none!important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    /* margin-left: 0.5em; */
+    margin:0 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding:0 !important;
+}

@@ -1,0 +1,119 @@
+﻿@model ToMoToStudy.TracNghiem
+@using ToMoToStudy.Helper
+
+@{
+    ViewBag.Title = "ThamGiaTracNghiem";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    int idtracnghiem = Model.IdTracNghiem;
+    var nd = (NguoiDung)Session["user"];
+    var tl = db.TracNghiems.Where(x => x.IdTracNghiem == idtracnghiem).FirstOrDefault();
+    var cauhoi = tl.TracNghiem_CauHoi.FirstOrDefault();
+
+    var daDB = db.SinhVien_BaiLam_TracNghiem.Any(x => x.IdCauHoi == cauhoi.IdCauHoi && x.SinhVien.IdNguoiDung == nd.IdNguoiDung);
+    if (daDB is true)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#dalambai").css("display", "none");
+                //$("#cautraloi").children().attr("disabled", "disabled");
+
+            });
+        </script>
+        <div class="container alert alert-success" role="alert" style="position:absolute; left: 50%;top: 50%;transform: translate(-50%, -50%);z-index:10">
+            <h1 class="text-center">Bài này đã hoàn thành</h1>
+        </div>
+    }
+}
+
+<div class="container" id="dalambai" style="margin-bottom:80px">
+    <div class="alert alert-success" role="alert" style="margin:10px 0">
+        Bài trắc nghiệm: @Model.TenTracNghiem
+        <br>
+        Hạn chót: @Model.HanChot
+    </div>
+    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+    {
+        int i = 1;
+        var tracnghiem = db.TracNghiems.Where(x => x.IdTracNghiem == Model.IdTracNghiem).FirstOrDefault();
+        var listCauHoi = tracnghiem.TracNghiem_CauHoi.ToList();
+        listCauHoi.Shuffle();
+
+        foreach (var item in listCauHoi)
+        {
+            var TNdapan = db.TracNghiem_DapAn.Where(x => x.IdCauHoi == item.IdCauHoi).ToList();
+            TNdapan.Shuffle();
+            string noidung = item.NoiDungCauHoi ?? "";
+            noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+            <div class="card time" style="margin-bottom: 20px ">
+                <div class="card-header">
+                    Câu @(i++):
+                </div>
+                <div class="card-body" style="padding:0">
+                    <blockquote class="blockquote mb-0" style="padding: 20px">
+                        @Html.Raw(noidung)
+                    </blockquote>
+                    <hr />
+                    <div class="form-group" style="padding:5px 20px">
+                        @foreach (var da in TNdapan)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input cautraloi" type="radio" name="DA_@item.IdCauHoi" id="DA_@da.IdDapAn" value="@da.IdDapAn">
+                                <label class="form-check-label" for="DA_@da.IdDapAn">
+                                    @da.DapAn
+                                </label>
+                            </div>
+                        }
+
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<style>
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+<footer>
+    <div class="row bg-color" style="width: 100%; padding: 10px; margin: 0; ">
+        <div class="col-6">
+            <button type="button" style="padding: 5px 20px" class=" btn-success float-right" onclick="NopBai()">Nộp bài</button>
+        </div>
+        <div class="col-6 " style="font-size:25px">
+            <b id="minimal" class="float-right" style="display:inline-block;background-color:white;color:black;padding:0 5px">
+                Thời gian:
+                <span id="demnguoc"></span>
+            </b>
+        </div>
+    </div>
+</footer>
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $("#demnguoc").countdowntimer({
+                minutes: @Model.ThoiGian,
+                size: "lg",
+                timeUp: HetGio
+            });
+        });
+        function HetGio() {
+            $(".time").css("pointer-events", "none");
+            $(".time").css("opacity", "0.8");
+            alert("Hết giờ");
+            NopBai();
+        }
+    });
+    function NopBai() {
+        alert("Đã nộp bài");
+        window.location.href = "/";
+    }
+</script>

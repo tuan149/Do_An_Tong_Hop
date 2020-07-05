@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewBag.Title = "DanhSachNguoiDung";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách tài khoản</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Tài khoản</li>
+            <li class="breadcrumb-item active" aria-current="page">Danh sách tài khoản</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAdd"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm tài khoản</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tài khoản</th>
+                                <th>Mật khẩu</th>
+                                <th>Email</th>
+                                <th>Quyền</th>
+                                <th>Chức năng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var list = db.NguoiDungs.ToList();
+                                foreach (var nguoidung in list)
+                                {
+                                    <tr>
+                                        <td>@nguoidung.TaiKhoan</td>
+                                        <td>@nguoidung.MatKhau</td>
+                                        <td>@nguoidung.Email</td>
+                                        <td>@(nguoidung.IdVaiTro == null ? "" : nguoidung.VaiTro.TenVaiTro)</td>
+                                        <td><a href="/Admin/ChiTietNguoiDung/@nguoidung.IdNguoiDung" class="btn btn-sm btn-primary">Chi tiết</a></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+
+<div class="modal fade bd-example-modal-lg" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Tài khoản</h5>
+
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên tài khoản</label>
+                        <input type="text" class="form-control" name="taikhoan">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-form-label">Email</label>
+                        <input type="email" class="form-control" name="email">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="col-form-label">Mật khẩu</label>
+                        <input type="password" class="form-control" name="matkhau">
+                    </div>
+                    <div class="form-group">
+                        Quyền
+                        <select name="vaitro" class="form-control select">
+
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                foreach (var item in db.VaiTroes.ToList())
+                                {
+                                    <option value="@item.IdVaiTro">@item.TenVaiTro</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var idnguoidung = 0;
+
+    function SaveInfo() {
+        var taikhoan = $("[name='taikhoan']").val();
+        var matkhau = $("[name='matkhau']").val();
+        var email = $("[name='email']").val();
+        var vaitro = $("[name='vaitro']").val();
+        if (taikhoan == '' || matkhau == '' || email== '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostTK',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdNguoiDung: 0,
+                TaiKhoan: taikhoan,
+                MatKhau: matkhau,
+                Email: email,
+                IdVaiTro: vaitro
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

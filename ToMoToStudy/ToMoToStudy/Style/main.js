@@ -1,0 +1,4 @@
+﻿bootbox.setDefaults({
+    centerVertical: true
+});
+

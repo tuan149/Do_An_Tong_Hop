@@ -1,0 +1,258 @@
+﻿@model ToMoToStudy.BaiHoc
+
+@{
+    ViewBag.Title = "ChiTietBaiHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <div class="container" style="margin-top:50px">
+        <div class="container-fluid" id="container-wrapper">
+            
+            <!-- Row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class=" mb-4">
+                        <div class="table-responsive">
+                            <nav>
+                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Thông tin bài học</a>
+                                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Tập tin</a>
+                                </div>
+                            </nav>
+                            <div class="tab-content" id="nav-tabContent">
+                                @* tab 1 *@
+                                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="padding:15px">
+                                    @using (Html.BeginForm())
+                                    {
+                                        @Html.AntiForgeryToken()
+                                    <div class="form-horizontal">
+                                        <div class="form-group">
+                                            Tên bài học
+                                            <div>
+                                                @Html.EditorFor(model => model.TenBaiHoc, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col form-group align-self-center">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" id="lop-@Model.IdBaiHoc" @(Model.ChoPhepNopBai == true ? "checked" : "") onchange="SaveTinhTrang(@Model.IdBaiHoc)">
+                                                    <label class="custom-control-label" for="lop-@Model.IdBaiHoc">Cho phép nộp bài</label>
+                                                </div>
+                                            </div>
+                                            <div class="col form-group">
+                                                Link video (<a href="">Hướng dẫn lấy link</a>)
+                                                <div>
+                                                    @Html.EditorFor(model => model.Video, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            Nội dung
+                                            <div>
+                                                <textarea rows="4" class="form-control" name="noidung">@Model.NoiDung</textarea>
+                                                <script>
+                                                    CKEDITOR.replace('noidung');
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-offset-2 ">
+                                                <button type="submit" class="btn btn-primary">Lưu</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                                @* tab 2 *@
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="form-group row">
+                                    <div class="col-6">
+                                        Chọn file cần tải
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" name="FILE">
+                                                <label class="custom-file-label" for="inputGroupTL">...</label>
+                                            </div>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-primary" type="button" onclick="TaiFile()">Tải lên</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th class="text-center">Tên</th>
+                                                <th class="text-center">Ngày tải lên</th>
+                                                <th class="text-center">Tải xuống</th>
+                                                <th class="text-right">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                                            {
+                                                int i = 1;
+
+                                                var file = db.FileGiangViens.Where(x => x.IdBaiHoc == Model.IdBaiHoc).ToList();
+                                                foreach (var item in file)
+                                                {
+                                                    <tr>
+                                                        <td>@(i++)</td>
+                                                        <td>@item.NoiDung</td>
+                                                        <td class="text-center">@item.NgayTao</td>
+                                                        <td class="text-center"><a href="~/file/@item.NoiDung" download=""><i class="fas fa-download"></i></a></td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-danger float-right" onclick="XoaFile(@item.IdFileThongBao)"><i class="fa fa-trash"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Row-->
+        </div>
+
+    </div>
+
+
+
+<script type="text/javascript">
+
+    function TaiFile() {
+        var formData = new FormData();
+        var files = $("[name='FILE']").get(0).files;
+        formData.append("file", files[0]);
+        formData.append("idbaihoc", @Model.IdBaiHoc);
+        $.ajax({
+            type: 'POST',
+            url: "/Ajax/PostFileHocVien",
+            data: formData,
+            
+            cache: false,
+            contentType: false,
+            processData: false,
+
+        }).done(function (result) {
+            if (result.Success) {
+                alert("Tải thành công !!");
+                location.reload();
+                return;
+            }
+        });
+    }
+
+    function SaveTinhTrang(idbaihoc) {
+        var _checkbox = $("#lop-" + idbaihoc);
+        if (_checkbox.is(":checked")) {
+            var chophepnopbai = true;
+        }
+        else {
+            var chophepnopbai = false;
+        }
+        $.ajax({
+            url: '/Ajax/TrinhTrangBaiHoc',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                idbaihoc,
+                chophepnopbai
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                $.notify("Thay đổi tình trạng thành công !", "success");
+                location.reload();
+                return;
+            }
+            $.notify(ketqua.Message, "error");
+        });
+    }
+
+
+    function SaveInfo() {
+        var link = $("[name='link']").val();
+        //var ngaytao = $("[name='ngaytao']").val();
+        var noidung = $("[name='noidungsave']").val();
+        var idbaihoc = @Model.IdBaiHoc;
+        var idsinhvien = $("[name='idsinhvien']").val();
+        if (idbaihoc == '' || idsinhvien == '') {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostFileHocVien',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                link,
+                //ngaytao,
+                noidung,
+                idbaihoc,
+                idsinhvien
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+    function XoaFile(IdFileThongBao) {
+        var dialog = bootbox.dialog({
+            title: 'Thông báo xóa',
+            message: "Bạn có muốn xóa không?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        dialog = bootbox.dialog({
+                            closeButton: false,
+                            message: '<center><i class="fa fa-spin fa-spinner"></i> Đang thực hiện...</center>'
+                        });
+                        dialog.init(function () {
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: '/Ajax/XoaFileThongBao',
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    data: {
+                                        IdFileThongBao
+                                    },
+                                }).done(function (ketqua) {
+                                    if (ketqua.Success) {
+                                        alert("Xóa thành công");
+                                        location.reload();
+                                        return;
+                                    }
+                                    alert(ketqua.Message);
+                                });
+                            }, 1000);
+                        });
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+</script>

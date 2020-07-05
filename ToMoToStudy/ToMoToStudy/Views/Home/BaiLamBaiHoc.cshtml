@@ -1,0 +1,91 @@
+﻿
+@{
+    ViewBag.Title = "BaiLamBaiHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="card" style="margin-top:20px">
+        <h5 class="card-header text-center">Danh sách học viên hoàn thành</h5>
+        <div class="card-body">
+            <table class="table align-items-center table-flush table-hover" id="tablebaihoc">
+                <thead class="thead-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Tên</th>
+                        <th>Mssv</th>
+                        <th>Lớp</th>
+                        <th>File </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                    {
+                        int idlop = ViewBag.IdLopHoc;
+                        int idbaihoc = ViewBag.IdBaiHoc;
+
+                        var baihoc = db.BaiHocs.Where(x => x.IdBaiHoc == idbaihoc).FirstOrDefault();
+                        var dsnopbai = baihoc.FileHocViens.ToList();
+                        List<SinhVien> lstSinhVien = new List<SinhVien>();
+                        foreach (var bai in dsnopbai)
+                        {
+                            
+                                var sinhVien = bai.SinhVien;
+                                if (!sinhVien.SVLops.Any(x => x.IdLopHoc == idlop))
+                                {
+                                    continue;
+                                }
+                                if (lstSinhVien.Any(x => x.IdSinhVien == sinhVien.IdSinhVien))
+                                {
+                                    continue;
+                                }
+                                lstSinhVien.Add(sinhVien);
+                        }
+
+                        int i = 1;
+                        foreach (var item in lstSinhVien)
+                        {
+                            int idSv = item.IdSinhVien;
+                            var ten = db.SinhViens.Where(x => x.IdSinhVien == item.IdSinhVien).FirstOrDefault();
+                            <tr>
+                                <td>@(i++)</td>
+                                <td>@ten.NguoiDung.HoTen</td>
+                                <td>@item.Mssv</td>
+                                <td>@item.MaLopSv</td>
+                                <td>
+                                    <button class="btn btn-primary float-right" onclick="BaiLam(@item.IdSinhVien,@idbaihoc,@idlop)"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#tablebaihoc').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    autoFilter: true,
+                    sheetName: 'Exported data',
+                    text: 'Xuất file excel',
+                    className: 'btn btn-info ',
+                },
+                {
+                    extend: 'copy',
+                    text: 'Copy vào bộ nhớ',
+                    className: 'btn btn-primary ',
+                },
+            ],
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+            }
+        });
+    });
+
+</script>

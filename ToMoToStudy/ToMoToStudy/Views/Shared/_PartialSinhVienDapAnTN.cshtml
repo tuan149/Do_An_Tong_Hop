@@ -1,0 +1,33 @@
+﻿@{
+    int idSV = (int)ViewBag.IdSV;
+    int idTN = (int)ViewBag.IdTN;
+}
+
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    int i = 1;
+    var tracnghiemdapan = db.TracNghiems.Where(x => x.IdTracNghiem == idTN).FirstOrDefault();
+    foreach (var item in tracnghiemdapan.TracNghiem_CauHoi)
+    {
+        // item chinh la cau hoi
+        string noidungdapan = item.NoiDungCauHoi ?? "";
+        noidungdapan = System.Text.RegularExpressions.Regex.Replace(noidungdapan, "<.*?>", String.Empty);
+        if (noidungdapan.Length > 300)
+        {
+            noidungdapan = noidungdapan.Substring(0, 300) + "...";
+        }
+        <div class="card" style="margin-bottom:10px">
+            <div class="card-header">
+                <b>Câu @(i++)</b>
+            </div>
+            <div class="card-block" style="padding:20px">
+                <label>@Html.Raw(noidungdapan)</label>
+                <hr />
+                <div id-question="@item.IdCauHoi" class="question">
+                    
+                </div>
+            </div>
+        </div>
+    }
+}

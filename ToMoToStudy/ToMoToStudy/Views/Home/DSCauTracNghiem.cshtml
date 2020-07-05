@@ -1,0 +1,136 @@
+﻿
+@{
+    ViewBag.Title = "DSCauTracNghiem";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+   
+    <div class="container" style="margin-top:50px">
+        <div class="card">
+            <div class="card-header">
+                Danh sách các câu hỏi trắc nghiệm
+            </div>
+            <div class="card-body">
+                <table class="table align-items-center table-flush table-hover" id="tabletracnghiem" style="background-color:white">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Nội dung</th>
+                            <th class="text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                        {
+                            int i = 1;
+                            var nd = (NguoiDung)Session["user"];
+                            var list = db.TracNghiem_CauHoi.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList();
+                            foreach (var tracnghiem in list)
+                            {
+                                string noidung = tracnghiem.NoiDungCauHoi ?? "";
+                                noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+                                if (noidung.Length > 100)
+                                {
+                                    noidung = noidung.Substring(0, 100) + "...";
+                                }
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td>
+                                        @Html.Raw(noidung)
+                                    </td>
+                                    <td>
+                                        <div class="btn-group float-right" role="group">
+                                            <button type="button" onclick="SuaTracNghiemCauHoi(@tracnghiem.IdCauHoi)" role="button" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></button>
+                                            <button type="button" class="btn btn-danger" onclick="XoaCauHoi"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" tabindex="-1" id="modalchitiet" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <textarea rows="10" class="form-control" name="noidungcauhoi"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        $('#tabletracnghiem').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+            }
+        });
+
+    });
+
+
+    function ChiTiet(idcauhoi) {
+        $("[name='noidungcauhoi']").val("");
+        $.ajax({
+            url: '/Ajax/DSTN',
+            type: 'GET',
+            dataType: 'text',
+            data: {
+                idcauhoi,
+            }
+        }).done(function (ketqua) {
+            var json = JSON.parse(ketqua);
+            $("[name='noidungcauhoi']").val(json.noidungcauhoi);
+            $("#modalchitiet").modal("show");
+        });
+    }
+
+
+    function SuaTracNghiemCauHoi(id) {
+        $('#vinh-tab').show();
+        iddapan = 0;
+        $("[name='dapan']").val("");
+        $("[name='dapandung']").prop('checked', false);
+
+        var noidungcauhoi = $("[name='noidungcauhoi']").val();
+        idcauhoi = id;
+        $.ajax({
+            url: '/Ajax/GetTracNghiemCauHoi/' + idcauhoi,
+            type: 'GET',
+            dataType: 'text',
+            data: {
+                idcauhoi,
+                noidungcauhoi,
+            }
+        }).done(function (ketqua) {
+            var json = JSON.parse(ketqua);
+            $("#addTitle").html("Chỉnh sửa");
+
+
+            $("[name='noidungcauhoi']").val(json.noidungcauhoi);
+            CKEDITOR.instances['noidungcauhoi'].setData(json.noidungcauhoi);
+            LayDanhSachDapAn(idcauhoi);
+            $('#modalAdd').modal("show");
+            $('#nav-vinh').show();
+        });
+    }
+
+    function LayDanhSachDapAn(id) {
+        $.ajax({
+            url: '/Admin/GetDapAnTracNghiemCauHoi/' + id,
+            type: 'POST',
+        }).done(function (ketqua) {
+            $("#dsDapAn").html(ketqua);
+        });
+    }
+
+</script>

@@ -1,0 +1,214 @@
+﻿
+@{
+    ViewBag.Title = "DanhSachLopHoc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Star Card -->
+    <div class="container">
+        <br />
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary" onclick="ThemLopHoc()"><i style="padding-right:5px" class="fas fa-plus"></i>Tạo lớp</button>
+            <button type="button" class="btn btn-secondary" onclick="ThamGiaLop()"><i style="padding-right:5px" class="fas fa-sign-in-alt"></i>Tham gia lớp</button>
+        </div>
+        <br />
+        <br />
+        <center><h4 style="background-color:whitesmoke;padding:10px">Giảng dạy</h4></center>
+        <br />
+        <div class="row card-main" style="width:100%;">
+            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+            {
+                var nd = (NguoiDung)Session["user"];
+                var listlop = db.LopHocs.Where(x => x.IdNguoiDung == nd.IdNguoiDung && x.TinhTrang == 1).ToList();
+                foreach (var item in listlop)
+                {
+                    <div class="card2 border-card mb-3" style="max-width: 18rem;min-height:220px">
+                        <a class="card-header text-white bg-color" href="/Home/ChiTietLopHoc/@item.IdLopHoc">@item.TenLop</a>
+                        <div>
+                            <div class="card-body text-info">
+                                <h5 class="card-title">Số SV tham gia: @item.SVLops.Count</h5>
+                                <p class="card-text">
+                                    @item.MoTa
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <center><h4 style="background-color:whitesmoke;padding:10px">Các lớp tham gia</h4></center>
+        <br />
+        <div class="row card-main" style="width:100%;">
+            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+            {
+                var nd = (NguoiDung)Session["user"];
+                var listlop = db.LopHocs.Where(x => x.SVLops.Any(i => i.SinhVien.IdNguoiDung == nd.IdNguoiDung)).ToList();
+                foreach (var item in listlop)
+                {
+                    <div class="card2 border-card mb-3" style="max-width: 18rem;min-height:220px">
+                        <a class="card-header text-white bg-color" href="/Home/ChiTietLopHoc/@item.IdLopHoc">@item.TenLop</a>
+                        <div class="card-body text-info">
+                            <h5 class="card-title">@item.NguoiDung.HoTen</h5>
+                            <p class="card-text">
+                                @item.MoTa
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+<!-- End Card -->
+
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle">Thêm môn học</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên lớp</label>
+                        <input type="text" class="form-control" name="tenlop">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Mô tả</label>
+                        <textarea type="text" class="form-control" name="mota" minlength="5" maxlength="6000"></textarea>
+                    </div>
+                    @*<div class="form-group">
+                            <label class="col-form-label">Tình trạng</label>
+                            <input type="text" class="form-control" name="tinhtrang">
+                        </div>*@
+                    <div class="form-group">
+                       Chương trình học
+                        <select name="cthoc" class="form-control select">
+
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                                var nd = (NguoiDung)Session["user"];
+                                var list = db.CT_HOC.Where(x => x.IdNguoiDung == nd.IdNguoiDung).ToList();
+                                foreach (var item in list)
+                                {
+                                    <option value="@item.IdCTHoc">@item.TenCT</option>
+                                }
+                            }
+
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalThamGiaLop" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTitle">Nhập mã lớp</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Mã lớp</label>
+                        <input type="text" class="form-control" name="malopadd">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="JoinLop()">Tham gia</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var idnguoidung = @(((NguoiDung)Session["user"]).IdNguoiDung);
+</script>
+
+<script type="text/javascript">
+    var idlophoc = 0;
+    var tinhtrang = 1;
+
+    function ThamGiaLop() {
+        $("[name='malopadd']").val("");
+        $('#modalThamGiaLop').modal("show");
+    }
+    function JoinLop() {
+        var malop = $("[name='malopadd']").val();
+        $.ajax({
+            url: '/Ajax/ThamGiaLop' ,
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                malop,
+                idnguoidung
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Tham gia  thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+
+    function ThemLopHoc() {
+        idlophoc = 0;
+        $("#addTitle").html("Thêm mới");
+       // $("[name='malop']").val("");
+        $("[name='tenlop']").val("");
+        $("[name='mota']").val("");
+        //$("[name='tinhtrang']").val("");
+        $("[name='cthoc']").val("");
+        //$("[name='nguoidung']").val("");
+        $('#modalAdd').modal("show");
+    }
+
+    function SaveInfo() {
+        //var malop = $("[name='malop']").val();
+        var tenlop = $("[name='tenlop']").val();
+        var mota = $("[name='mota']").val();
+        var tinhtrang = $("[name='tinhtrang']").val();
+        var cthoc = $("[name='cthoc']").val();
+        if ( tenlop == '' || mota == '' || tinhtrang == '' || cthoc == '' ) {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+        $.ajax({
+            url: '/Ajax/PostLopHoc',
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            dataType: "json",
+            data: {
+                IdLopHoc: idlophoc,
+                TenLop: tenlop,
+                MoTa: mota,
+                //TinhTrang: tinhtrang,
+                IdCTHoc: cthoc,
+                IdNguoiDung: idnguoidung
+            },
+        }).done(function (ketqua) {
+            //ketqua = $.parseJSON(ketqua);
+            if (ketqua.Success) {
+                alert("Lưu dữ liệu thành công");
+                location.reload();
+                return;
+            }
+            alert(ketqua.Message);
+        });
+    }
+</script>

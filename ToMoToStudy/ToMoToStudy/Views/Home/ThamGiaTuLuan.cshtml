@@ -1,0 +1,152 @@
+﻿@model ToMoToStudy.TuLuan
+@using ToMoToStudy.Helper
+
+@{
+    ViewBag.Title = "ThamGiaTuLuan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (ToMoToDBEntities db = new ToMoToDBEntities())
+{
+    int idtuluan = Model.IdTuLuan;
+    var nd = (NguoiDung)Session["user"];
+    var tl = db.TuLuans.Where(x => x.IdTuLuan == idtuluan).FirstOrDefault();
+    var cauhoi = tl.TuLuan_CauHoi.FirstOrDefault();
+
+    var daDB = db.SinhVien_TL_DapAn.Any(x => x.IdCauHoiTuLuan == cauhoi.IdCauHoiTuLuan && x.SinhVien.IdNguoiDung == nd.IdNguoiDung);
+    if (daDB is true)
+    {
+        <script>
+            $(document).ready(function () {
+                $("#dalambai").css("display", "none");
+                //$("#cautraloi").children().attr("disabled", "disabled");
+            });
+        </script>
+        <div class="container alert alert-success" role="alert" style="position:absolute; left: 50%;top: 50%;transform: translate(-50%, -50%);z-index:10">
+            <h1 class="text-center">Bài này đã hoàn thành</h1>
+        </div>
+    }
+}
+<div class="container" id="dalambai" style="margin-bottom:80px">
+    <div class="alert alert-success" role="alert" style="margin:10px 0">
+        Bài tự luận: @Model.TenTuLuan
+        <br>
+        Hạn chót: @Model.HanChot
+    </div>
+    @using (ToMoToDBEntities db = new ToMoToDBEntities())
+    {
+        int i = 1;
+        var tuluan = db.TuLuans.Where(x => x.IdTuLuan == Model.IdTuLuan).FirstOrDefault();
+        var listCauHoi = tuluan.TuLuan_CauHoi.ToList();
+        listCauHoi.Shuffle();
+        foreach (var item in listCauHoi)
+        {
+            string noidung = item.CauHoiTuLuan ?? "";
+            noidung = System.Text.RegularExpressions.Regex.Replace(noidung, "<.*?>", String.Empty);
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    Câu @(i++):
+                </div>
+                <div class="card-body" style="padding:0">
+                    <blockquote class="blockquote mb-0" style="padding: 20px">
+                        @Html.Raw(noidung)
+                    </blockquote>
+                    <hr />
+                    <div class="form-group" style="padding:5px 20px">
+                        <label for="TL@(i)">Câu trả lời</label>
+                        <textarea class="form-control cautraloi" id="TL@(i)" rows="3" id-cauhoi-tl="@item.IdCauHoiTuLuan"></textarea>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<style>
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+<footer >
+    <div class="row bg-color" style="width: 100%; padding: 10px; margin: 0; ">
+        <div class="col-6">
+              <button type="button" style="padding: 5px 20px" class=" btn-success float-right" onclick="NopBai()">Nộp bài</button>
+        </div>
+        <div class="col-6 " style="font-size:25px">
+            <b id="minimal" class="float-right" style="display:inline-block;background-color:white;color:black;padding:0 5px">
+                Thời gian:
+                <span id="demnguoc"></span>
+            </b>
+        </div>
+    </div>
+</footer>   
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $("#demnguoc").countdowntimer({
+                minutes: @Model.ThoiGian,
+                size: "lg",
+                timeUp: HetGio
+            });
+        });
+        function HetGio() {
+            $(".time").css("pointer-events", "none");
+            $(".time").css("opacity", "0.8");
+            alert("Hết giờ");
+            NopBai();
+        }
+    });
+
+
+    function LayDapAn() {
+        var lstDapAn = [];
+        $(".cautraloi").each(function () {
+            var textarea = $(this);
+            var idcauhoi = textarea.attr("id-cauhoi-tl");
+            var dapan = textarea.val();
+            var phantu = { 'IdCauHoiTuLuan': idcauhoi, 'DapAn': dapan };
+            lstDapAn.push(phantu);
+        });
+
+        return lstDapAn;
+    }
+
+
+    function NopBai() {
+        var lst = LayDapAn();
+        $.ajax({
+            url: '/Ajax/NopBai',
+            type: 'POST',
+            data: {
+                lstDapAn: lst
+            },
+        }).done(function (ketqua) {
+            alert("Đã nộp bài");
+            window.location.href = "/";
+        });
+    }
+
+    function XacNhan() {
+        var dialog = bootbox.dialog({
+            title: 'Thông báo nộp bài',
+            message: "Bạn chắc chắn muốn nộp bài?",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () {
+                        NopBai();
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+</script>

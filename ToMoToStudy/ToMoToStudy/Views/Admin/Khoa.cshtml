@@ -1,0 +1,158 @@
+﻿
+@{
+    ViewBag.Title = "Khoa";
+    Layout = "~/Views/Shared/Admin_Layout.cshtml";
+}
+
+<div class="container-fluid" id="container-wrapper">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách tài khoản</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="./">Trang chủ</a></li>
+            <li class="breadcrumb-item">Quản lý</li>
+            <li class="breadcrumb-item active" aria-current="page">Khoa</li>
+        </ol>
+    </div>
+
+    <!-- Row -->
+    <div class="row">
+        <div class="col-lg-12" style="margin-bottom:20px">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAdd" onclick="CreateKhoa()"><i style="padding-right:5px" class="fas fa-plus"></i>Thêm Khoa</button>
+        </div>
+        <!-- DataTable with Hover -->
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="table-responsive p-3">
+                    <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tên khoa</th>
+                                <th>Chức năng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @using (ToMoToDBEntities db = new ToMoToDBEntities())
+                            {
+                             
+                                var khoa = db.Khoas.ToList();
+                                foreach (var item in khoa)
+                                {
+                                    <tr>
+                                        <td>@item.TenKhoa</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary" onclick="EditKhoa(@item.IdKhoa)"><i class="fa fa-edit"></i></button>
+                                                <button type="button" class="btn btn-danger" onclick="DeleteKhoa(@item.IdKhoa,'@item.TenKhoa')"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Row-->
+</div>
+
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel mo1">Thêm Khoa</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Chinh sửa</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên Khoa</label>
+                        <input type="text" class="form-control" name="NAME">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="SaveInfo()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var idkhoa = 0;
+
+
+    function EditKhoa(id) {
+        idkhoa = id;
+        $.ajax({
+            url: '/Ajax/GetKhoa/' + idkhoa,
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                id: idkhoa,
+            }
+        }).done(function (ketqua) {
+            
+            var json = JSON.parse(ketqua);
+            $("[name='NAME']").val(json.NAME);
+            $('#modalAdd').modal("show");
+        });
+    }
+
+   function DeleteKhoa(id,name) {
+        // hien message
+        var dialog = bootbox.dialog({
+            title: 'Thông báo xóa khoa',
+            message: "<p>Bạn có muốn xóa khoa "+ name +" không?</p>",
+            size: 'large',
+            closeButton: false,
+            buttons: {
+                ok: {
+                    label: "Có",
+                    className: 'btn-info',
+                    callback: function () { 
+                        var dialog = bootbox.dialog({
+                             closeButton: false,
+                            message: '<p><i class="fa fa-spin fa-spinner"></i> Đang thực hiện...</p>'
+                        });
+
+                        dialog.init(function () {
+                            setTimeout(function () {
+                                location.href = "/Admin/XoaKhoa/" + id;
+                            }, 1000);
+                        });
+                    }
+                },
+                cancel: {
+                    label: "Không",
+                    className: 'btn-danger',
+                }
+            }
+        });
+    }
+    
+    function SaveInfo() {
+        var ten = $("[name='NAME']").val();
+        if (ten == "") {
+            alert("Vui lòng điền thông tin đầy đủ!");
+            return
+        }
+        $.ajax({
+            url: '/Ajax/PostKhoa',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                IdKhoa: idkhoa,
+                TenKhoa: ten
+            }
+        }).done(function (ketqua) {
+            if (ketqua == "ok") {
+                alert("Dữ liệu đã thêm thành công!");
+                location.reload();
+                return;
+            }
+            alert(ketqua);
+        });
+    }
+</script>
